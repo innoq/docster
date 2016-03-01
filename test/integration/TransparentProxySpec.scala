@@ -1,26 +1,27 @@
-import java.net.ServerSocket
+package integration
+
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.matching.RequestPattern.everything
-import com.github.tomakehurst.wiremock.verification.LoggedRequest
+import integration.FakeApplicationHelper.withApplication
+import integration.WireMockHelper._
 import org.scalatest.FlatSpec
+import play.api.Application
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import play.api.{Application, Play}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class ProxySpec extends FlatSpec {
+class TransparentProxySpec extends FlatSpec {
 
   val missingConfiguration: Map[String, Nothing] = Map()
 
-  behavior of "docster as a proxy"
+  behavior of "docster as a transparent proxy"
 
   it should "return a 500 if server base uri is not configured" in {
 
@@ -136,19 +137,6 @@ class ProxySpec extends FlatSpec {
     }
   }
 
-  def findCapturedRequest(server: WireMockServer): LoggedRequest = {
-    server.findRequestsMatching(everything()).getRequests.get(0)
-  }
-
-  def withAppAndMock(app: FakeApplication, server: WireMockServer, call: () => Unit): Unit = {
-    withApplication(app) {
-      () => withWireMock(server) {
-        () => {
-          call()
-        }
-      }
-    }
-  }
 
   def call(fakeRequest: FakeRequest[AnyContentAsEmpty.type], application: Application): Option[Result] = {
     route(application, fakeRequest) match {
@@ -164,30 +152,7 @@ class ProxySpec extends FlatSpec {
     }
   }
 
-  def withWireMock(server: WireMockServer)(call: () => Unit): Unit = {
-    server.start()
-    try {
-      call()
-    } finally {
-      server.shutdownServer()
-    }
-  }
 
-  def withApplication(app: Application)(call: () => Unit): Unit = {
-    Play.start(app)
-    try {
-      call()
-    }
-    finally {
-      Play.stop(app)
-    }
-  }
 
-  def freePort(): Int = {
-    val socket = new ServerSocket(0)
-    val port = socket.getLocalPort
-    socket.close()
-    port
-  }
 
 }
