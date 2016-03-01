@@ -1,4 +1,4 @@
-https://travis-ci.org/innoq/docster.svg?branch=master
+![](https://travis-ci.org/innoq/docster.svg?branch=master)
 
 # Docster
 
