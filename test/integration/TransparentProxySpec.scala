@@ -1,21 +1,15 @@
 package integration
 
 import java.util.UUID
-import java.util.concurrent.TimeUnit
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
-import integration.FakeApplicationHelper.withApplication
+import integration.FakeApplicationHelper._
 import integration.WireMockHelper._
 import org.scalatest.FlatSpec
-import play.api.Application
 import play.api.mvc._
-import play.api.test.Helpers._
 import play.api.test._
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 
 class TransparentProxySpec extends FlatSpec {
 
@@ -93,7 +87,7 @@ class TransparentProxySpec extends FlatSpec {
     val server = new WireMockServer(port)
 
     withAppAndMock(app, server, () => {
-      val request = FakeRequest(GET, wireMockUri)
+      val request = FakeRequest("GET", wireMockUri)
       call(request, app)
       assert(findCapturedRequest(server).getUrl == wireMockUri)
     })
@@ -138,19 +132,7 @@ class TransparentProxySpec extends FlatSpec {
   }
 
 
-  def call(fakeRequest: FakeRequest[AnyContentAsEmpty.type], application: Application): Option[Result] = {
-    route(application, fakeRequest) match {
-      case Some(result) => Some(Await.result(result, Duration(1000, TimeUnit.SECONDS)))
-      case None => None
-    }
-  }
 
-  def callWithBody(fakeRequest: FakeRequest[String], application: Application): Option[Result] = {
-    route(application, fakeRequest) match {
-      case Some(result) => Some(Await.result(result, Duration(1000, TimeUnit.SECONDS)))
-      case None => None
-    }
-  }
 
 
 
