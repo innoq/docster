@@ -2,6 +2,10 @@ language: scala
 jdk:
     - oraclejdk8
 
+# ------------------------------
+# enable caching
+# ------------------------------
+
 # Use container-based infrastructure
 sudo: false
 
