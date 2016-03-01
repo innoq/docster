@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import integration.FakeApplicationHelper._
 import integration.WireMockHelper._
 import org.scalatest.FlatSpec
-import play.api.mvc._
 import play.api.test._
 
 class TransparentProxySpec extends FlatSpec {
@@ -22,43 +21,45 @@ class TransparentProxySpec extends FlatSpec {
     val app = FakeApplication(additionalConfiguration = Map())
 
     withApplication(app) { () =>
-      val result = call(FakeRequest("GET", "/proxy"), app)
+      val result = call(FakeRequest("GET", randomUri), app)
       assert(result.isDefined && result.get.header.status == 500)
     }
-
   }
 
   it should "forward incoming requests for all http methods" in {
 
-    val port: Integer = freePort()
     val wireMockUri = randomUri
-    val app = FakeApplication(additionalConfiguration = configurationWithWireMockBaseUri(port))
+    val port = freePort()
     val server = new WireMockServer(port)
+    val app = application(port)
 
     val methods = List("GET", "PUT", "POST", "DELETE", "HEAD")
 
     withAppAndMock(app, server, () => {
       methods.foreach { method =>
         server.stubFor(any(urlPathEqualTo(wireMockUri)).willReturn(aResponse().withStatus(200)))
-        val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(method, wireMockUri)
+        val request = FakeRequest(method, wireMockUri)
+
         val result = call(request, app)
+
         assert(result.isDefined && result.get.header.status == 200, "for request: " + request)
       }
     })
   }
 
-
   it should "forward all incoming headers" in {
 
-    val port: Integer = freePort()
     val wireMockUri = randomUri
-    val app = FakeApplication(additionalConfiguration = configurationWithWireMockBaseUri(port))
+    val port = freePort()
     val server = new WireMockServer(port)
+    val app = application(port)
 
     withAppAndMock(app, server, () => {
       val headers = Map(("Content-Type", "text/html"), ("Location", "somewhere"), ("X-Something", "something"))
-      val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", wireMockUri).withHeaders(headers.toList: _*)
+      val request = FakeRequest("GET", wireMockUri).withHeaders(headers.toList: _*)
+
       call(request, app)
+
       assertSameHeader(server, headers)
     })
   }
@@ -66,59 +67,62 @@ class TransparentProxySpec extends FlatSpec {
 
   it should "forward the incoming body" in {
 
-    val port: Integer = freePort()
-    val wireMockUri = randomUri
-    val app = FakeApplication(additionalConfiguration = configurationWithWireMockBaseUri(port))
+    val port = freePort()
     val server = new WireMockServer(port)
+    val app = application(port)
 
     withAppAndMock(app, server, () => {
       val body = "Hello World"
-      val request: FakeRequest[String] = FakeRequest("POST", wireMockUri).withBody(body)
+      val request = FakeRequest("POST", randomUri).withBody(body)
+
       callWithBody(request, app)
+
       assert(findCapturedRequest(server).getBodyAsString == body)
     })
   }
 
   it should "call the same uri on the server" in {
 
-    val port: Integer = freePort()
     val wireMockUri = "/this/is/just/a/test"
-    val app = FakeApplication(additionalConfiguration = configurationWithWireMockBaseUri(port))
+    val port = freePort()
     val server = new WireMockServer(port)
+    val app = application(port)
 
     withAppAndMock(app, server, () => {
       val request = FakeRequest("GET", wireMockUri)
+
       call(request, app)
+
       assert(findCapturedRequest(server).getUrl == wireMockUri)
     })
   }
 
   it should "forward servers response back to the client" in {
 
-    val port: Integer = freePort()
     val wireMockUri = randomUri
-    val app = FakeApplication(additionalConfiguration = configurationWithWireMockBaseUri(port))
+    val port = freePort()
     val server = new WireMockServer(port)
-    val body = "Hello World"
-    val header = ("anyHeader", "anyHeaderValue")
+    val app = application(port)
 
     withAppAndMock(app, server, () => {
+      val body = "Hello World"
+      val header = ("anyHeader", "anyHeaderValue")
       val mockResponse: ResponseDefinitionBuilder = aResponse()
         .withStatus(200)
         .withBody(body)
         .withHeader(header._1, header._2)
       server.stubFor(any(urlEqualTo(wireMockUri)).willReturn(mockResponse))
-      val request: FakeRequest[String] = FakeRequest("POST", wireMockUri).withBody(body)
+      val request = FakeRequest("POST", wireMockUri).withBody(body)
+
       val proxyResponse = callWithBody(request, app)
+
       assert(proxyResponse.isDefined && proxyResponse.get.header.status == 200 && proxyResponse.get.header.headers.get(header._1).get == header._2)
     })
   }
 
-
   def randomUri: String = {
     "/" + UUID.randomUUID()
   }
-
 
   def configurationWithWireMockBaseUri(port: Integer): Map[String, String] = {
     Map(("server.uri", "http://localhost:" + port))
@@ -131,10 +135,8 @@ class TransparentProxySpec extends FlatSpec {
     }
   }
 
-
-
-
-
-
+  def application(port: Integer): FakeApplication = {
+    FakeApplication(additionalConfiguration = configurationWithWireMockBaseUri(port))
+  }
 
 }
