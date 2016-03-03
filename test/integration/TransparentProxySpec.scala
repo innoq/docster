@@ -124,9 +124,6 @@ class TransparentProxySpec extends FlatSpec {
     "/" + UUID.randomUUID()
   }
 
-  def configurationWithWireMockBaseUri(port: Integer): Map[String, String] = {
-    Map(("server.uri", "http://localhost:" + port))
-  }
 
   def assertSameHeader(server: WireMockServer, headers: Map[String, String]): Unit = {
     val capturedRequest = findCapturedRequest(server)
@@ -135,8 +132,5 @@ class TransparentProxySpec extends FlatSpec {
     }
   }
 
-  def application(port: Integer): FakeApplication = {
-    FakeApplication(additionalConfiguration = configurationWithWireMockBaseUri(port))
-  }
 
 }
