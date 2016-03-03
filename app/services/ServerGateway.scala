@@ -1,7 +1,9 @@
 package services
 
-import play.api.libs.ws.WSClient
-import play.api.mvc.{ResponseHeader, Result}
+import play.api.libs.iteratee.Enumerator
+import play.api.libs.ws.{WSClient, WSResponseHeaders}
+import play.api.mvc.Result
+import play.api.mvc.Results.Status
 
 import scala.concurrent.Future
 
@@ -18,9 +20,12 @@ case object ServerGateway {
       .withRequestTimeout(1000)
 
     wsRequest.stream().map {
-      case (response, body) =>
-        Result(ResponseHeader(response.status, toSimpleHeaderMap(response.headers)), body)
+      case (headers: WSResponseHeaders, body: Enumerator[Array[Byte]]) =>
+        new Status(headers.status)
+          .chunked(body)
+          .withHeaders(toSimpleHeaderMap(headers.headers).toList: _*)
     }
+
   }
 
   private def toSimpleHeaderMap(headers: Map[String, Seq[String]]): Map[String, String] = {
