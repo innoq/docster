@@ -1,6 +1,7 @@
 package integration
 
 import java.net.ServerSocket
+import java.util.UUID
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.matching.RequestPattern._
@@ -23,6 +24,11 @@ object WireMockHelper {
       }
     }
   }
+
+  def randomUri: String = {
+    "/" + UUID.randomUUID()
+  }
+
 
   def withWireMock(server: WireMockServer)(call: () => Unit): Unit = {
     server.start()

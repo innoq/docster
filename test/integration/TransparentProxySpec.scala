@@ -120,9 +120,6 @@ class TransparentProxySpec extends FlatSpec {
     })
   }
 
-  def randomUri: String = {
-    "/" + UUID.randomUUID()
-  }
 
 
   def assertSameHeader(server: WireMockServer, headers: Map[String, String]): Unit = {
