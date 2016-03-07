@@ -1,10 +1,6 @@
 package services
 
-import play.api.mvc.Result
-
-import scala.concurrent.Future
-
 trait Transformer {
 
-  def transform(serverResult: Future[Result]): Future[Documentation]
+  def transform(request: ProxyRequest, response: ProxyResponse): Documentation
 }

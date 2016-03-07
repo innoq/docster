@@ -1,3 +1,5 @@
+package filter
+
 import play.api.Logger
 import play.api.mvc._
 import scala.concurrent.Future
@@ -16,7 +18,7 @@ class AccessLogFilter extends Filter {
       val requestTime = endTime - startTime
 
       Logger.info(s"${requestHeader.method} ${requestHeader.uri} " +
-        s"took ${requestTime}ms and returned ${result.header.status}")
+        s"took ${requestTime}ms and returned ${result.header.status}, header: ${requestHeader.headers.toSimpleMap}")
 
       result.withHeaders("Request-Time" -> requestTime.toString)
     }

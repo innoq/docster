@@ -1,7 +1,12 @@
 package services
 
+import play.api.http.MediaRange
+import services.MediaRanges._
 
-case class ProxyRequest(method: String, uri: String, headers: Map[String, Seq[String]], body: String) {
+
+case class ProxyRequest(method: String = "GET", uri: String, headers: Map[String, Seq[String]] = Map.empty, body: String = "") {
+
+  lazy val mediaRanges = headers.get("Accept").map(toMediaRanges).getOrElse(List.empty).reverse
 
   def simpleHeaderMap: Map[String, String] = {
     headers.map {
@@ -11,6 +16,33 @@ case class ProxyRequest(method: String, uri: String, headers: Map[String, Seq[St
 
   def putHeader(key: String, value: Seq[String]): ProxyRequest = {
     copy(headers = headers.updated(key, value))
+  }
+
+  def putHeader(header: (String, Seq[String])): ProxyRequest = {
+    putHeader(header._1, header._2)
+  }
+
+  private def mimeTypeIndex(s: String, ranges: Seq[MediaRange] = mediaRanges) = {
+    ranges.indexWhere(_.accepts(s))
+  }
+
+  def compareMimeTypePrecedence(a: String, b: String): Int = {
+    mimeTypeIndex(a).compareTo(mimeTypeIndex(b))
+  }
+
+  def mimeTypeHasHigherOrEqualPrecedence(single: String, others: Iterable[String]): Boolean = {
+    def max: Int = {
+      val indices = others.map(mimeTypeIndex(_, mediaRanges))
+      if (indices.isEmpty)
+        -1
+      else
+        indices.max
+    }
+
+    val bestIndexOthers = max
+    val bestIndexSingle = mimeTypeIndex(single, mediaRanges)
+
+    bestIndexSingle >= bestIndexOthers
   }
 
 }

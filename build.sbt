@@ -6,6 +6,8 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.11.6"
 
+javaOptions in Test ++= Seq(s"-Dlogger.resource=" + sys.props.getOrElse("logger.resource", default = ""))
+
 libraryDependencies ++= Seq(
   jdbc,
   cache,
@@ -16,8 +18,6 @@ libraryDependencies ++= Seq(
   "org.mockito" % "mockito-all" % "1.10.19",
   "org.jsoup" % "jsoup" % "1.8.3"
 )
-
-resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
 // Play provides two styles of routers, one expects its actions to be injected, the
 // other, legacy style, accesses its actions statically.

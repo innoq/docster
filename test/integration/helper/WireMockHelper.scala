@@ -1,4 +1,4 @@
-package integration
+package integration.helper
 
 import java.net.ServerSocket
 import java.util.UUID
@@ -6,7 +6,7 @@ import java.util.UUID
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.matching.RequestPattern._
 import com.github.tomakehurst.wiremock.verification.LoggedRequest
-import integration.FakeApplicationHelper.withApplication
+import integration.helper.FakeApplicationHelper.withApplication
 import play.api.test.FakeApplication
 
 object WireMockHelper {

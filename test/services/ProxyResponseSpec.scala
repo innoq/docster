@@ -1,15 +1,11 @@
-package integration
+package services
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock._
-import integration.FakeApplicationHelper._
-import integration.WireMockHelper._
-import org.jsoup.Jsoup
 import org.scalatest.FlatSpec
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.libs.iteratee.Enumerator
+import play.api.mvc.Results.Status
+import play.api.mvc.{Result, Results}
 
-class HalSpec extends FlatSpec {
+class ProxyResponseSpec extends FlatSpec {
 
   val json =
     """
@@ -68,32 +64,24 @@ class HalSpec extends FlatSpec {
       |}
     """.stripMargin
 
+  behavior of "a ProxyResponse"
 
-  behavior of "docster should return a HAL html representation that"
+  it can "be created from a simple result object" in {
 
-  ignore should "contains the name of the resource as title" in {
+    val simpleResult: Result = Results.Ok(json)
 
-    val wireMockUri = randomUri
-    val port = freePort()
-    val server = new WireMockServer(port)
-    val app = application(port)
+    val response = ProxyResponse(simpleResult)
 
-    withAppAndMock(app, server, () => {
-      server.stubFor(any(urlMatching(".*"))
-        .withHeader("Accept", containing("application/hal+json"))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(json)))
-
-      val result = route(app, FakeRequest("GET", randomUri)).get
-      val responseStatus = status(result)
-      val responseBody = contentAsString(result)
-      val responseHeaders = headers(result)
-      val document = Jsoup.parse(responseBody)
-      assert(responseStatus == 200 && responseHeaders.get("Content-Type").exists(_.contains("text/html")) && document.title() == "Orders")
-    })
-
+    assert(response.body == json)
   }
 
+  it can "be created from a chunked result object" in {
+
+    val result = new Status(200).chunked(Enumerator(json))
+
+    val response = ProxyResponse(result)
+
+    assert(response.body == json)
+  }
 
 }

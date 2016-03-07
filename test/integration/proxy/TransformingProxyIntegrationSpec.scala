@@ -1,16 +1,17 @@
-package integration
+package integration.proxy
 
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
-import integration.FakeApplicationHelper._
-import integration.WireMockHelper._
+import integration.helper.FakeApplicationHelper._
+import integration.helper.WireMockHelper._
+import integration.helper.{FakeApplicationHelper, WireMockHelper}
 import org.scalatest.FlatSpec
 import play.api.test.Helpers._
 import play.api.test.{FakeApplication, FakeRequest}
 
-class TransformingProxySpec extends FlatSpec {
+class TransformingProxyIntegrationSpec extends FlatSpec {
 
   behavior of "docster as a transforming proxy"
 
@@ -40,7 +41,7 @@ class TransformingProxySpec extends FlatSpec {
 
       val result = route(app, request).get
 
-      assert(status(result) == 200 && contentAsString(result) == "{}")
+      assert(status(result) == 200 && headers(result).get("Content-Type").get.contains("text/html"))
     })
 
 

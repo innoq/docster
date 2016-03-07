@@ -1,6 +1,4 @@
-package integration
-
-import java.util.concurrent.TimeUnit
+package integration.helper
 
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.Helpers._

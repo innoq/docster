@@ -1,16 +1,15 @@
-package integration
-
-import java.util.UUID
+package integration.proxy
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
-import integration.FakeApplicationHelper._
-import integration.WireMockHelper._
+import integration.helper.FakeApplicationHelper._
+import integration.helper.WireMockHelper._
+import integration.helper.{FakeApplicationHelper, WireMockHelper}
 import org.scalatest.FlatSpec
 import play.api.test._
 
-class TransparentProxySpec extends FlatSpec {
+class TransparentProxyIntegrationSpec extends FlatSpec {
 
   val missingConfiguration: Map[String, Nothing] = Map()
 

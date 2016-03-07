@@ -1,4 +1,4 @@
-package unit
+package services
 
 import org.scalatest.FlatSpec
 import services.ProxyRequestCreator.enrichAcceptHeader
