@@ -22,3 +22,11 @@ script:
   # Tricks to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+
+deploy:
+  provider: heroku
+  api_key:
+    secure: u9XLTLAQPEixLIo+ZjCxUtefb/EYKhT4oTrbli30uhW1IfPre7+4O9PGzfUVQYJ5wcbxk9rXZv1XIx5dDUC9emO9pDisw4f9ckDIriLtk7r+8WV3RGWFC1AOoiJ+Dwdxg8nhmiC7jGZB2sAGbshrSxFXiJAhOubnRAcbcVOxv6YfWdxX4+ZboHwErPf7ipMGUuQM/PBwAuKzty0tki7RjRr+sRXXLgiSI8+qTa8W2H8rj9pVXsJ0kKoh7RXzgNCH7pDyJE1DDEjBLSx8OrPs6FpjUcA14tEAB6ikJSoi5IdjjVOqBYyWyWo0YFmGUkFj/dFH6RAwSlsxpKIy4exD41WdfZN9r9D3vQH3L8tQrv6BqK22i/Q4Cs1AjPJEKMmH0aZg/bJooLcoIg0CD2/bgDcphj7Dz3iVcOO2wQIGdDx1oP5nq5xPcwjqV8InQYQdG3eMiRFRo6RdJKtLBFQk4bsZQt8Z85jBiMJ3AqAvdzEPMBLvkBJuCGcYuEpefwEL7f3i06xhZrxDf0JETrF0gQbVheZqozxAJqVJ4rs4oVsLrdxzGR7zp8NZiKMF9qcoh1CNKhk9t2UBg4SILCilHYrkzEVzZHa7+M7gaKGtGxaxM1/earZzEfbFb4HSZutbiorx9Po7bRyiqncBAdqUDCP6skvFVX24TXxLB2hVRJg=
+  app: docster
+  on:
+    repo: innoq/docster
