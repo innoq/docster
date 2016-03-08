@@ -6,7 +6,7 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.11.6"
 
-javaOptions in Test ++= Seq(s"-Dlogger.resource=" + sys.props.getOrElse("logger.resource", default = ""))
+javaOptions in Test ++= Seq(s"-Dlogger.resource=" + sys.props.getOrElse("logger.resource", default = "logback.xml"))
 
 libraryDependencies ++= Seq(
   jdbc,
