@@ -1,5 +1,7 @@
 package services
 
+import java.net.URI
+
 import play.api.Configuration
 import play.api.http.MediaRange
 import play.api.mvc.Request
@@ -13,15 +15,15 @@ case object ProxyRequestCreator {
 
   def mapToForwardingRequest(request: Request[String], requestPath: String, configuration: Configuration): Try[ProxyRequest] = {
     calculateServerUri(requestPath, configuration).map { uri =>
-      val proxyRequest = ProxyRequest(request.method, uri, request.headers.toMap, request.body)
+      val proxyRequest = ProxyRequest(request.method, uri.toString, request.headers.toMap, request.body).putHeader("host", List(uri.getHost))
       addJsonHypermediaContentTypes(proxyRequest)
     }
   }
 
-  private def calculateServerUri(path: String, configuration: Configuration): Try[String] = {
+  private def calculateServerUri(path: String, configuration: Configuration): Try[URI] = {
     configuration.getString("server.uri") match {
       case Some("unset") => Failure(new IllegalStateException("server base uri not configured"))
-      case Some(basePath) => Success(basePath + "/" + path)
+      case Some(basePath) => Success(URI.create(basePath + "/" + path))
       case None => Failure(new IllegalStateException("server base uri not configured"))
     }
   }

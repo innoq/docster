@@ -7,6 +7,7 @@ import play.api.{Application, Play}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 object FakeApplicationHelper {
 
@@ -29,12 +30,9 @@ object FakeApplicationHelper {
     route(application, fakeRequest).map(t => Await.result(t, 100000 seconds))
 
 
-  def application(port: Integer): FakeApplication = {
-    FakeApplication(additionalConfiguration = configurationWithWireMockBaseUri(port))
-  }
-
-  def configurationWithWireMockBaseUri(port: Integer): Map[String, String] = {
-    Map(("server.uri", "http://localhost:" + port))
+  def application(host: String = "localhost", port: Option[Integer] = None): FakeApplication = {
+    val portPart= port.map( port => s":$port").getOrElse("")
+    FakeApplication(additionalConfiguration = Map(("server.uri", s"http://$host$portPart")))
   }
 
 }

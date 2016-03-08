@@ -21,7 +21,7 @@ class TransformingProxyIntegrationSpec extends FlatSpec {
     val wireMockUri = "/" + UUID.randomUUID()
     val port = freePort()
     val server = new WireMockServer(port)
-    val app: FakeApplication = application(port)
+    val app: FakeApplication = application(port = Some(port))
 
     withAppAndMock(app, server, () => {
 

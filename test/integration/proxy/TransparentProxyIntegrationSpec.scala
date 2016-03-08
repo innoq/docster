@@ -30,7 +30,7 @@ class TransparentProxyIntegrationSpec extends FlatSpec {
     val wireMockUri = randomUri
     val port = freePort()
     val server = new WireMockServer(port)
-    val app = application(port)
+    val app = application(port = Some(port))
 
     val methods = List("GET", "PUT", "POST", "DELETE", "HEAD")
 
@@ -51,7 +51,7 @@ class TransparentProxyIntegrationSpec extends FlatSpec {
     val wireMockUri = randomUri
     val port = freePort()
     val server = new WireMockServer(port)
-    val app = application(port)
+    val app = application(port = Some(port))
 
     withAppAndMock(app, server, () => {
       val headers = Map(("Content-Type", "text/html"), ("Location", "somewhere"), ("X-Something", "something"))
@@ -68,7 +68,7 @@ class TransparentProxyIntegrationSpec extends FlatSpec {
 
     val port = freePort()
     val server = new WireMockServer(port)
-    val app = application(port)
+    val app = application(port = Some(port))
 
     withAppAndMock(app, server, () => {
       val body = "Hello World"
@@ -85,7 +85,7 @@ class TransparentProxyIntegrationSpec extends FlatSpec {
     val wireMockUri = "/this/is/just/a/test"
     val port = freePort()
     val server = new WireMockServer(port)
-    val app = application(port)
+    val app = application(port = Some(port))
 
     withAppAndMock(app, server, () => {
       val request = FakeRequest("GET", wireMockUri)
@@ -101,7 +101,7 @@ class TransparentProxyIntegrationSpec extends FlatSpec {
     val wireMockUri = randomUri
     val port = freePort()
     val server = new WireMockServer(port)
-    val app = application(port)
+    val app = application(port = Some(port))
 
     withAppAndMock(app, server, () => {
       val body = "Hello World"

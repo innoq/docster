@@ -77,7 +77,7 @@ class HalIntegrationSpec extends FlatSpec {
     val wireMockUri = randomUri
     val port = freePort()
     val server = new WireMockServer(port)
-    val app = application(port)
+    val app = application(port = Some(port))
 
     withAppAndMock(app, server, () => {
       server.stubFor(any(urlMatching(".*"))
