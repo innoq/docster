@@ -1,32 +1,19 @@
 language: scala
 jdk:
-    - oraclejdk8
-
-# ------------------------------
-# enable caching
-# ------------------------------
-
-# Use container-based infrastructure
+- oraclejdk8
 sudo: false
-
-# These directories are cached to S3 at the end of the build
 cache:
   directories:
-    - $HOME/.ivy2/cache
-    - $HOME/.sbt/boot/
-
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt/boot/"
 script:
-  # Your normal script
-  - sbt ++$TRAVIS_SCALA_VERSION -J-XX:ReservedCodeCacheSize=256M test
-
-  # Tricks to avoid unnecessary cache updates
-  - find $HOME/.sbt -name "*.lock" | xargs rm
-  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
-
+- sbt ++$TRAVIS_SCALA_VERSION -J-XX:ReservedCodeCacheSize=256M test
+- find $HOME/.sbt -name "*.lock" | xargs rm
+- find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 deploy:
   provider: heroku
   api_key:
-    secure: u9XLTLAQPEixLIo+ZjCxUtefb/EYKhT4oTrbli30uhW1IfPre7+4O9PGzfUVQYJ5wcbxk9rXZv1XIx5dDUC9emO9pDisw4f9ckDIriLtk7r+8WV3RGWFC1AOoiJ+Dwdxg8nhmiC7jGZB2sAGbshrSxFXiJAhOubnRAcbcVOxv6YfWdxX4+ZboHwErPf7ipMGUuQM/PBwAuKzty0tki7RjRr+sRXXLgiSI8+qTa8W2H8rj9pVXsJ0kKoh7RXzgNCH7pDyJE1DDEjBLSx8OrPs6FpjUcA14tEAB6ikJSoi5IdjjVOqBYyWyWo0YFmGUkFj/dFH6RAwSlsxpKIy4exD41WdfZN9r9D3vQH3L8tQrv6BqK22i/Q4Cs1AjPJEKMmH0aZg/bJooLcoIg0CD2/bgDcphj7Dz3iVcOO2wQIGdDx1oP5nq5xPcwjqV8InQYQdG3eMiRFRo6RdJKtLBFQk4bsZQt8Z85jBiMJ3AqAvdzEPMBLvkBJuCGcYuEpefwEL7f3i06xhZrxDf0JETrF0gQbVheZqozxAJqVJ4rs4oVsLrdxzGR7zp8NZiKMF9qcoh1CNKhk9t2UBg4SILCilHYrkzEVzZHa7+M7gaKGtGxaxM1/earZzEfbFb4HSZutbiorx9Po7bRyiqncBAdqUDCP6skvFVX24TXxLB2hVRJg=
-  app: docster
+    secure: zi3U4RBGsDh3Pqsy7TMyWlSN69xKoU6h+F6S3pgKTTTTf28cgYrervNI/+HfXoy9ErbR0L5uh0PBBt7/1mCU/cSLmfWpGHU0UGLWAe2uIVI7eJ8mpUpgJdcKmKqk8eyFIykQA9q0Vdd15bvXZNUx/qSnFOvPeFCmraeSuTeezhsrGwn+J2KtQwWh0asyotu3NdI+oHfTW0/w5Lf7EB3mL6cXToNyTiOnfjsYcyEHyzK5DrsX7lsfayB+y9qweyLhUlGnHAB3/NpR/9ARh7kz80oK+iCQ06NQgR+2HL8DIaIgYyWYocj1+waa8EC8vO5SkPLySx91HMGQDStG5BUS3tZAOqsksuveNbmnT23uSWLTFdrwOdiQom734H9jqob5reGPxAkMytfptraUOINe1dU3DY3Y3Ly1/JRDLg4VFUNnpfm2JzdvHu469T8EfzNNtUaX4SCH3n0IWApElXuSzOOMuJQ5dBlRciCQqEtobgMSZoOyOb0inQSa7oclos98NopzgCfQqJAHQKuz7i6/Eww0fxLAEDEaTwi8IhHfrPJcTIixq836zJFRz2VxNseBydzXV7AKQ0yxWGvegTz8UwjcnS/bRo2iNv8DOAaev2yKbYbXeoHntARD0V+aGPi8Y1h+VKLwecNAn5c7qesxK3sBT7h0u7dcn3sK0RB01us=
+  app: docster-innoq
   on:
     repo: innoq/docster
