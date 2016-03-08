@@ -14,6 +14,8 @@ import scala.concurrent.Future
 
 class ResultTransformerSpec extends FlatSpec with ScalaFutures {
 
+  val ANY = "anything"
+
   implicit val defaultPatience = PatienceConfig(timeout = Span(20, Minutes), interval = Span(5, Millis))
 
   behavior of "a result transformer"
@@ -49,7 +51,7 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
     val halTransformer = mock(classOf[Transformer])
     val sirenTransformer = mock(classOf[Transformer])
 
-    val documentation = Documentation("anything", Overview("anything"))
+    val documentation = Documentation(ANY, Overview(ANY), List(Relation(ANY, ANY)))
     when(halTransformer.transform(MockitoMatchers.any, MockitoMatchers.any)).thenReturn(documentation)
 
     val transformedResult = transformResult(Future.successful(result), request, Map((halJson, halTransformer), ("application/vnd.siren+json", sirenTransformer)))

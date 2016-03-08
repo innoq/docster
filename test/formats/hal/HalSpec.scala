@@ -1,7 +1,7 @@
 package formats.hal
 
 import org.scalatest.FlatSpec
-import services.{ProxyRequest, ProxyResponse}
+import services.{Relation, ProxyRequest, ProxyResponse}
 
 class HalTransformerSpec extends FlatSpec {
 
@@ -74,6 +74,17 @@ class HalTransformerSpec extends FlatSpec {
   it should "headline should contain the last capitalized path segment of the self ref" in {
     val documentation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
     assert(documentation.overview.headline.contains("Orders"))
+  }
+
+  it should "should add all links to a relations section" in {
+    val documentation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    val relations = List(
+      Relation("self", "http://localhost:8080/orders"),
+      Relation("profile", "http://localhost:8080/profile/orders"),
+      Relation("search", "http://localhost:8080/orders/search")
+    )
+
+    assert(documentation.relations == relations)
   }
 
 }

@@ -10,8 +10,28 @@
     </head>
 </html>
 <body>
-    <section class="overview">
-        <h1 id="overview-title">@documentation.overview.headline</h1>
-    </section>
+    <main>
+        <section id="overview">
+            <h1 id="overview-title">@documentation.overview.headline</h1>
+        </section>
+        <section id="relations">
+            <h2 id="relations-title">Relations</h2>
+            @for(relation <- documentation.relations) {
+                <div class="relation">
+                    <h3>@relation.key</h3>
+                    <dl>
+                        <dt>Relation</dt>
+                        <dd>@relation.key</dd>
+                        <dt>Uri</dt>
+                        <dd><a href=@relation.uri></a> @relation.uri</dd>
+                        @if(relation.description){
+                        <dt>Description</dt>
+                        <dd>@relation.description</dd>
+                        }
+                    </dl>
+                </div>
+            }
+        </section>
+    </main>
 </body>
 

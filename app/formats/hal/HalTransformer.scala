@@ -6,6 +6,8 @@ import com.theoryinpractise.halbuilder.api.{ContentRepresentation, Representatio
 import com.theoryinpractise.halbuilder.json.JsonRepresentationFactory
 import services._
 
+import scala.collection.JavaConversions._
+
 object HalTransformer extends Transformer {
 
   implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -18,12 +20,19 @@ object HalTransformer extends Transformer {
 
     val title = extractTitle(representation)
     val headline = title
+    val relations = extractRelations(representation)
 
-    Documentation(title, Overview(headline))
+    Documentation(title, Overview(headline), relations)
   }
 
   private def extractTitle(representation: ContentRepresentation): String = {
     Option(representation.getResourceLink).flatMap(_.getHref.split("/").lastOption).map(_.capitalize).getOrElse("undefined")
+  }
+
+  private def extractRelations(representation: ContentRepresentation): List[Relation] = {
+    representation.getLinks.toList.map { link =>
+      Relation(link.getRel, link.getHref)
+    }
   }
 
 }
