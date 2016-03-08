@@ -49,7 +49,7 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
     val halTransformer = mock(classOf[Transformer])
     val sirenTransformer = mock(classOf[Transformer])
 
-    val documentation = Documentation(title = "Hello World")
+    val documentation = Documentation("anything", Overview("anything"))
     when(halTransformer.transform(MockitoMatchers.any, MockitoMatchers.any)).thenReturn(documentation)
 
     val transformedResult = transformResult(Future.successful(result), request, Map((halJson, halTransformer), ("application/vnd.siren+json", sirenTransformer)))

@@ -26,6 +26,6 @@ object ProxyResponse {
   }
 }
 
-case class ProxyResponse(status: Int, headers: Map[String, Seq[String]], body: String)
+case class ProxyResponse(status: Int = 200, headers: Map[String, Seq[String]] = Map(), body: String = "")
 
 

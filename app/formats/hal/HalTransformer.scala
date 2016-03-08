@@ -1,18 +1,29 @@
 package formats.hal
 
-import play.api.libs.json.Json
+import java.io.StringReader
+
+import com.theoryinpractise.halbuilder.api.{ContentRepresentation, RepresentationFactory}
+import com.theoryinpractise.halbuilder.json.JsonRepresentationFactory
 import services._
 
 object HalTransformer extends Transformer {
 
   implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
+  val hal: RepresentationFactory = new JsonRepresentationFactory()
+
   override def transform(request: ProxyRequest, response: ProxyResponse): Documentation = {
 
-    val body = Json.parse(response.body)
-    val selfLink = (body \ "_links" \ "self" \ "href").asOpt[String]
-    val title = selfLink.flatMap(_.split("/").lastOption).map(_.capitalize).getOrElse("undefined")
+    val representation = hal.readRepresentation(RepresentationFactory.HAL_JSON, new StringReader(response.body))
 
-    Documentation(title = title)
+    val title = extractTitle(representation)
+    val headline = title
+
+    Documentation(title, Overview(headline))
   }
+
+  private def extractTitle(representation: ContentRepresentation): String = {
+    Option(representation.getResourceLink).flatMap(_.getHref.split("/").lastOption).map(_.capitalize).getOrElse("undefined")
+  }
+
 }

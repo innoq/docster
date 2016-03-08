@@ -1,15 +1,11 @@
-package integration.formats
+package formats.hal
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock._
-import integration.helper.FakeApplicationHelper._
-import integration.helper.WireMockHelper._
-import org.jsoup.Jsoup
 import org.scalatest.FlatSpec
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import services.{ProxyRequest, ProxyResponse}
 
-class HalIntegrationSpec extends FlatSpec {
+class HalTransformerSpec extends FlatSpec {
+
+  val anyRequest: ProxyRequest = ProxyRequest(uri = "something")
 
   val json =
     """
@@ -68,34 +64,16 @@ class HalIntegrationSpec extends FlatSpec {
       |}
     """.stripMargin
 
+  behavior of "a HalTransformer"
 
-  behavior of "docster should return a HAL html representation that"
+  it should "use last path segment of the self ref as capitalized titel" in {
+    val documentation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    assert(documentation.title == "Orders")
+  }
 
-  it should "is a valid representation of the given json" in {
-
-    val wireMockUri = randomUri
-    val port = freePort()
-    val server = new WireMockServer(port)
-    val app = application(port = Some(port))
-
-    withAppAndMock(app, server, () => {
-      server.stubFor(any(urlMatching(".*"))
-        .withHeader("Accept", containing("application/hal+json"))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withHeader("Content-Type", "application/hal+json")
-          .withBody(json)))
-
-      val result = route(app, FakeRequest("GET", randomUri)).get
-      val responseStatus = status(result)
-      val responseBody = contentAsString(result)
-      val responseHeaders = headers(result)
-      val document = Jsoup.parse(responseBody)
-      assert(responseStatus == 200 && responseHeaders.get("Content-Type").exists(_.contains("text/html")))
-      assert(document.title() == "Orders")
-      assert(document.getElementById("overview-title").text().contains("Orders"))
-    })
-
+  it should "headline should contain the last capitalized path segment of the self ref" in {
+    val documentation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    assert(documentation.overview.headline.contains("Orders"))
   }
 
 }
