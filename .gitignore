@@ -20,3 +20,4 @@ server.pid
 *.eml
 /dist/
 .cache
+/.ensime_cache/

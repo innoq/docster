@@ -1,0 +1,53 @@
+@import services.DocsterConfiguration
+
+@(configuration: DocsterConfiguration)(implicit flash: Flash)
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Docster - Admin Console</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    </head>
+</html>
+<body>
+
+    <main class="container">
+
+
+        <section>
+            <h1 class="page-header">Docster - Admin Console</h1>
+
+            @if(flash.get("success")) {
+                <div class="alert alert-success">
+                    <strong>Success!</strong> @flash.get("success").get
+                </div>
+            }
+
+            @if(flash.get("failure")) {
+                <div class="alert alert-danger">
+                    <strong>Failure!</strong> @flash.get("failure").get
+                </div>
+            }
+
+            @if(configuration.serverBaseUri.isEmpty) {
+                <div class="alert alert-warning">
+                    <strong>Server base URI not configured!</strong> Please configure one to enable request forwarding and documenting.
+                </div>
+            }
+
+
+
+            <form method="POST" action="@controllers.routes.AdminController.configChange()">
+                <div class="form-group">
+                    <label for="inputServerBaseUri">Server URI</label>
+                    <input type="url" required class="form-control" name="server.uri" placeholder="http://myServerBaseUri" value=@configuration.serverBaseUri>
+                    <p class="help-block">scheme and authority used for reuqest forwarding.</p>
+                </div>
+                <button type="submit"  class="btn btn-default">Submit</button>
+            </form>
+        </section>
+    </main>
+
+</body>
+

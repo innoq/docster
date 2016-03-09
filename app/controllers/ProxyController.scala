@@ -2,31 +2,37 @@ package controllers
 
 import javax.inject.Inject
 
+import play.api.Logger
 import play.api.libs.ws._
 import play.api.mvc._
-import play.api.{Logger, _}
 import services.ProxyRequestCreator.mapToForwardingRequest
 import services.ResultTransformer.transformResult
 import services.ServerGateway.forwardRequestToServer
+import services.{DocsterConfiguration, ServerBaseUriNotConfigured}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-class ProxyController @Inject()(ws: WSClient)(configuration: Configuration) extends Controller {
+class ProxyController @Inject()(ws: WSClient)(docsterConfig: DocsterConfiguration) extends Controller {
 
   implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
   def proxy(requestPath: String) = Action.async(parse.tolerantText) { originalRequest =>
     val result: Try[Future[Result]] = for {
-      forwardingRequest <- mapToForwardingRequest(originalRequest, requestPath, configuration)
+      forwardingRequest <- mapToForwardingRequest(originalRequest, requestPath, docsterConfig)
       serverResponse <- Try(forwardRequestToServer(forwardingRequest, ws))
       transformedResult <- Try(transformResult(serverResponse, forwardingRequest))
     } yield transformedResult
 
     result match {
       case Failure(ex) =>
-        Logger.error(ex.getMessage, ex)
-        Future(InternalServerError(ex.getMessage))
+        ex match {
+          case ex: ServerBaseUriNotConfigured =>
+            Future.successful(Redirect(controllers.routes.AdminController.adminConsole()))
+          case default =>
+            Logger.error(ex.getMessage, ex)
+            Future(InternalServerError(ex.getMessage))
+        }
       case Success(finalResult) => finalResult
     }
   }
