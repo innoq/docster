@@ -15,13 +15,13 @@ class TransparentProxyIntegrationSpec extends FlatSpec {
 
   behavior of "docster as a transparent proxy"
 
-  it should "return a 500 if server base uri is not configured" in {
+  it should "redirect the user to the admin console if server base uri is not configured" in {
 
     val app = FakeApplication(additionalConfiguration = Map())
 
     withApplication(app) { () =>
       val result = call(FakeRequest("GET", randomUri), app)
-      assert(result.isDefined && result.get.header.status == 500)
+      assert(result.isDefined && result.get.header.status == 303 && result.get.header.headers.get("location").get == "/docster/admin")
     }
   }
 
