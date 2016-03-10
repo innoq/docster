@@ -14,24 +14,23 @@ object HalTransformer extends Transformer {
 
   val hal: RepresentationFactory = new JsonRepresentationFactory()
 
-  override def transform(request: ProxyRequest, response: ProxyResponse): Documentation = {
+  override def transform(request: ProxyRequest, response: ProxyResponse): Representation = {
 
     val representation = hal.readRepresentation(RepresentationFactory.HAL_JSON, new StringReader(response.body))
 
-    val title = extractTitle(representation)
-    val headline = title
-    val relations = extractRelations(representation)
+    val name = extractTitle(representation)
+    val links = extractNavigations(representation)
 
-    Documentation(title, Overview(headline), relations)
+    Representation(name, navigations = links)
   }
 
   private def extractTitle(representation: ContentRepresentation): String = {
     Option(representation.getResourceLink).flatMap(_.getHref.split("/").lastOption).map(_.capitalize).getOrElse("undefined")
   }
 
-  private def extractRelations(representation: ContentRepresentation): List[Relation] = {
+  private def extractNavigations(representation: ContentRepresentation): List[Navigation] = {
     representation.getLinks.toList.map { link =>
-      Relation(link.getRel, link.getHref)
+      Navigation(link.getRel, link.getHref)
     }
   }
 

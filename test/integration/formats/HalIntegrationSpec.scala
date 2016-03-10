@@ -92,7 +92,6 @@ class HalIntegrationSpec extends FlatSpec {
       val responseHeaders = headers(result)
       val document = Jsoup.parse(responseBody)
       assert(responseStatus == 200 && responseHeaders.get("Content-Type").exists(_.contains("text/html")))
-      assert(document.title() == "Orders")
       assert(document.getElementById("overview-title").text().contains("Orders"))
       assert(document.getElementById("relations").getElementsByClass("relation").size() == 3)
     })

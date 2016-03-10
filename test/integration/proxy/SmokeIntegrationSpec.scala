@@ -23,7 +23,7 @@ class SmokeIntegrationSpec extends FlatSpec {
       val resContent = Jsoup.parse(contentAsString(response))
       val resTitle = resContent.title()
 
-      assert(resStatus == 200 && resContentType.contains("text/html") && resTitle == "Orders", s"response=$resContent")
+      assert(resStatus == 200 && resContentType.contains("text/html") && resTitle == "Docster - Orders", s"response=$resContent")
     }
   }
 

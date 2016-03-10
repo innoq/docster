@@ -22,8 +22,8 @@ case object ResultTransformer {
       } yield transformerMapping._2
     }
 
-    def documentationToResult(documentation: Documentation, status: Int): Result = {
-      Results.Ok(views.html.resource(documentation))
+    def documentationToResult(representation: Representation, status: Int): Result = {
+      Results.Ok(views.html.resource(representation))
     }
 
     result.map { (result: Result) =>
