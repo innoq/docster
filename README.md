@@ -2,8 +2,13 @@
 
 # Docster
 
-
 Transforming proxy that creates an html represenation of your json hypermedia (e.g. HAL) api on the fly.
+
+## Running instances
+
+- Docster instance on Heroku: [https://docster-innoq.herokuapp.com](https://docster-innoq.herokuapp.com)
+- Sample HAL API: [https://lit-woodland-47740.herokuapp.com/](https://lit-woodland-47740.herokuapp.com/)
+
 
 ## Start
 
@@ -26,3 +31,6 @@ sbt test
 ## Current Features
 
 - transparent proxy
+- HAL support:
+  - displays relations
+  - displays attributes
