@@ -12,7 +12,7 @@ case class JArray(arr: List[Attribute]) extends Attribute
 
 case class Description(description: Either[String, URI])
 
-case class Representation(name: String, attributes: Option[JObject] = None, navigations: Seq[Relation] = List.empty, actions: Seq[Action] = List.empty, description: Option[Description] = None) extends Attribute
+case class Representation(name: String, attributes: Option[JObject] = None, navigations: Seq[Relation] = List.empty, actions: Seq[Action] = List.empty, description: Option[Description] = None, embeddedRepresentations: Map[String, List[Representation]] = Map.empty) extends Attribute
 
 trait Action
 

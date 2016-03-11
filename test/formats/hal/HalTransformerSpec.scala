@@ -193,6 +193,12 @@ class HalTransformerSpec extends FlatSpec {
       |}
     """.stripMargin
 
+  ignore should "transform embedded entities" in {
+
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = orderServiceJson))
+
+  }
+
 
   it should "transform simple attributes" in {
 

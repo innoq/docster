@@ -1,0 +1,54 @@
+@import services.Representation
+@import views.AttributeHelper
+
+@(representation: Representation)
+
+<section id="overview">
+    <h1 id="overview-title" class="page-header">@representation.name Resource</h1>
+</section>
+
+<section id="relations" class="panel-group">
+    <h2 id="relations-title">Relations</h2>
+    @for(relation <- representation.navigations) {
+        <div class="relation panel panel-default">
+            <div class="panel-heading">@relation.key</div>
+            <div class="panel-body">
+                <dl class="dl-horizontal">
+                    <dt>Relation</dt>
+                    <dd>@relation.key</dd>
+                    <dt>Uri</dt>
+                    <dd><a href=@relation.uri>@relation.uri</a></dd>
+                    @if(relation.description) {
+                        <dt>Description</dt>
+                        <dd>@relation.description</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    }
+</section>
+
+<section id="attributes" class="panel-group">
+    <h2 id="relations-title">Attributes</h2>
+    <div class="relation panel panel-default">
+        <div class="panel-body">
+        @if(representation.attributes) {
+            @Html(AttributeHelper.renderAttribute(representation.attributes.get))
+        }
+        </div>
+    </div>
+</section>
+
+<section id="entities" class="panel-group">
+    <h2 id="relations-title">Embedded Entities</h2>
+    <div class="relation panel panel-default">
+        <div class="panel-body">
+        @for(pair <- representation.embeddedRepresentations) {
+            <h2>Entity: @pair._1</h2>
+            @for(embeddedRepresentation <- pair._2) {
+                @this(embeddedRepresentation)
+            }
+        }
+        </div>
+    </div>
+</section>

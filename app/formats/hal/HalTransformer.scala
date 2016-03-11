@@ -3,7 +3,7 @@ package formats.hal
 import java.io.StringReader
 import java.util
 
-import com.theoryinpractise.halbuilder.api.{ContentRepresentation, RepresentationFactory}
+import com.theoryinpractise.halbuilder.api.{ReadableRepresentation, RepresentationFactory}
 import com.theoryinpractise.halbuilder.json.JsonRepresentationFactory
 import services._
 
@@ -15,7 +15,7 @@ object HalTransformer extends Transformer {
 
   val hal: RepresentationFactory = new JsonRepresentationFactory()
 
-  private def extractAttributes(representation: ContentRepresentation): Option[JObject] = {
+  private def extractAttributes(representation: ReadableRepresentation): Option[JObject] = {
 
     representation.getProperties.toMap match {
       case properties if properties.isEmpty => None
@@ -35,26 +35,31 @@ object HalTransformer extends Transformer {
     }
   }
 
-  private def extractTitle(representation: ContentRepresentation): String = {
+  private def extractTitle(representation: ReadableRepresentation): String = {
     Option(representation.getResourceLink).flatMap(_.getHref.split("/").lastOption).map(_.capitalize).getOrElse("undefined")
   }
 
-  private def extractRelations(representation: ContentRepresentation): List[Relation] = {
+  private def extractRelations(representation: ReadableRepresentation): List[Relation] = {
     representation.getLinks.toList.map { link =>
       Relation(link.getRel, link.getHref)
     }
   }
 
-
   override def transform(request: ProxyRequest, response: ProxyResponse): Representation = {
-
     val representation = hal.readRepresentation(RepresentationFactory.HAL_JSON, new StringReader(response.body))
+    toRepresentation(representation)
+  }
+
+  def toRepresentation(representation: ReadableRepresentation): Representation = {
 
     val name = extractTitle(representation)
     val links = extractRelations(representation)
     val atts = extractAttributes(representation)
+    val embeddeds = representation.getResourceMap.toMap.map {
+      case (key, halRepresentation: util.Collection[ReadableRepresentation]) => (key, halRepresentation.toList.map(toRepresentation))
+    }
 
-    Representation(name, navigations = links, attributes = atts)
+    Representation(name, navigations = links, attributes = atts, embeddedRepresentations = embeddeds)
   }
 
 

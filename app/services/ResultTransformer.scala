@@ -18,12 +18,11 @@ case object ResultTransformer {
       for {
         mediaRange <- result.header.headers.get("Content-Type").map(MediaRanges.toMediaRange)
         transformerMapping <- transformers.find((pair) => mediaRange.accepts(pair._1))
-
       } yield transformerMapping._2
     }
 
     def documentationToResult(representation: Representation, status: Int): Result = {
-      Results.Ok(views.html.resource(representation))
+      Results.Ok(views.html.representationPage(representation))
     }
 
     result.map { (result: Result) =>

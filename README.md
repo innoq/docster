@@ -34,3 +34,4 @@ sbt test
 - HAL support:
   - displays relations
   - displays attributes
+  - displays embedded entities
