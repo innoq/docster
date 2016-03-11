@@ -16,4 +16,20 @@ case class Representation(name: String, attributes: Option[JObject] = None, navi
 
 trait Action
 
-case class Relation(key: String, uri: String, description: Option[Description] = None)
+trait Relation {
+  def description: Option[Description]
+
+  def target: String
+
+  def key: String
+}
+
+case class Link(key: String, uri: URI, description: Option[Description] = None) extends Relation {
+
+  def target = uri.toString
+}
+
+case class Form(key: String, uri: String, description: Option[Description] = None) extends Relation {
+
+  def target = uri
+}

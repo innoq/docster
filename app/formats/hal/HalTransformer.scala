@@ -1,8 +1,10 @@
 package formats.hal
 
 import java.io.StringReader
+import java.net.URI
 import java.util
 
+import com.theoryinpractise.halbuilder.api
 import com.theoryinpractise.halbuilder.api.{ReadableRepresentation, RepresentationFactory}
 import com.theoryinpractise.halbuilder.json.JsonRepresentationFactory
 import services._
@@ -43,8 +45,13 @@ object HalTransformer extends ContentTypeTransformer {
   }
 
   private def extractRelations(representation: ReadableRepresentation): List[Relation] = {
-    representation.getLinks.toList.map { link =>
-      Relation(link.getRel, link.getHref)
+    representation.getLinks.toList.map(toRelation)
+  }
+
+  private def toRelation(link: com.theoryinpractise.halbuilder.api.Link): Relation = {
+    link match {
+      case form if link.hasTemplate => Form(link.getRel, link.getHref)
+      case plainLink => Link(link.getRel, URI.create(link.getHref))
     }
   }
 
