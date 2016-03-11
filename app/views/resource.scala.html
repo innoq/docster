@@ -1,5 +1,11 @@
 @import services.Representation
+@import views.AttributeHelper
+
 @(representation: Representation)
+
+
+
+
 
 <!DOCTYPE html>
 <html>
@@ -35,6 +41,18 @@
                     </div>
                 </div>
             }
+        </section>
+
+        <section id="attributes" class="panel-group">
+            <h2 id="relations-title">Attributes</h2>
+            <div class="relation panel panel-default">
+                @*<div class="panel-heading">@relation.key</div>*@
+                <div class="panel-body">
+                @if(representation.attributes) {
+                    @Html(AttributeHelper.renderAttribute(representation.attributes.get))
+                }
+                </div>
+            </div>
         </section>
 
     </main>

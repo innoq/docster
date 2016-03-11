@@ -1,6 +1,7 @@
 package formats.hal
 
 import java.io.StringReader
+import java.util
 
 import com.theoryinpractise.halbuilder.api.{ContentRepresentation, RepresentationFactory}
 import com.theoryinpractise.halbuilder.json.JsonRepresentationFactory
@@ -14,24 +15,47 @@ object HalTransformer extends Transformer {
 
   val hal: RepresentationFactory = new JsonRepresentationFactory()
 
-  override def transform(request: ProxyRequest, response: ProxyResponse): Representation = {
+  private def extractAttributes(representation: ContentRepresentation): Option[JObject] = {
 
-    val representation = hal.readRepresentation(RepresentationFactory.HAL_JSON, new StringReader(response.body))
+    representation.getProperties.toMap match {
+      case properties if properties.isEmpty => None
+      case notEmpty => Some(JObject(notEmpty.mapValues(toAttribute)))
+    }
+  }
 
-    val name = extractTitle(representation)
-    val links = extractNavigations(representation)
-
-    Representation(name, navigations = links)
+  private def toAttribute(thing: AnyRef): Attribute = {
+    thing match {
+      case x: String => JString(x)
+      case x: java.lang.Integer => JString(x + "")
+      case x: java.lang.Double => JString(x + "")
+      case x: java.lang.Boolean => JString(x + "")
+      case x: util.ArrayList[AnyRef] => JArray(x.toList.map(toAttribute))
+      case x: util.Map[String, AnyRef] => JObject(x.toMap.mapValues(toAttribute))
+      case default => throw new IllegalStateException(s"unexpected type: $default.type")
+    }
   }
 
   private def extractTitle(representation: ContentRepresentation): String = {
     Option(representation.getResourceLink).flatMap(_.getHref.split("/").lastOption).map(_.capitalize).getOrElse("undefined")
   }
 
-  private def extractNavigations(representation: ContentRepresentation): List[Navigation] = {
+  private def extractRelations(representation: ContentRepresentation): List[Relation] = {
     representation.getLinks.toList.map { link =>
-      Navigation(link.getRel, link.getHref)
+      Relation(link.getRel, link.getHref)
     }
   }
+
+
+  override def transform(request: ProxyRequest, response: ProxyResponse): Representation = {
+
+    val representation = hal.readRepresentation(RepresentationFactory.HAL_JSON, new StringReader(response.body))
+
+    val name = extractTitle(representation)
+    val links = extractRelations(representation)
+    val atts = extractAttributes(representation)
+
+    Representation(name, navigations = links, attributes = atts)
+  }
+
 
 }

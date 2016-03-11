@@ -2,7 +2,6 @@ package services
 
 import java.net.URI
 
-import play.api.Configuration
 import play.api.http.MediaRange
 import play.api.mvc.Request
 

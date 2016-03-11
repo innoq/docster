@@ -1,7 +1,7 @@
 package formats.hal
 
 import org.scalatest.FlatSpec
-import services.{Navigation, ProxyRequest, ProxyResponse}
+import services._
 
 class HalTransformerSpec extends FlatSpec {
 
@@ -74,9 +74,9 @@ class HalTransformerSpec extends FlatSpec {
   it should " add all links to a relations section" in {
     val documentation = HalTransformer.transform(anyRequest, ProxyResponse(body = springRestJson))
     val navigations = List(
-      Navigation("self", "http://localhost:8080/orders"),
-      Navigation("profile", "http://localhost:8080/profile/orders"),
-      Navigation("search", "http://localhost:8080/orders/search")
+      Relation("self", "http://localhost:8080/orders"),
+      Relation("profile", "http://localhost:8080/profile/orders"),
+      Relation("search", "http://localhost:8080/orders/search")
     )
 
     assert(documentation.navigations == navigations)
@@ -194,10 +194,112 @@ class HalTransformerSpec extends FlatSpec {
     """.stripMargin
 
 
-//  it should "transform all attributes properly" in {
-//    val documentation = HalTransformer.transform(anyRequest, ProxyResponse(body = orderServiceJson))
-//
-//    assert(documentation.navigations == relations)
-//  }
+  it should "transform simple attributes" in {
+
+    val json =
+      """
+        | {
+        | "id": 442820205,
+        | "price": 12.3,
+        | "done": true,
+        | "age": 1
+        |}
+      """.stripMargin
+
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+
+    val expectedAttributes = JObject(Map(
+      ("id", JString("442820205")),
+      ("price", JString("12.3")),
+      ("done", JString("true")),
+      ("age", JString("1"))))
+
+    assert(representation.attributes.get == expectedAttributes)
+  }
+
+
+  it should "transform array with simple attributes" in {
+
+    val json =
+      """
+        |{
+        |    "status": "fine",
+        |    "ids": [
+        |        12,
+        |        14,
+        |        15,
+        |        18
+        |    ]
+        |}
+      """.stripMargin
+
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+
+    val expectedAttributes = JObject(Map(
+      ("status", JString("fine")),
+      ("ids", JArray(List(
+        JString("12"),
+        JString("14"),
+        JString("15"),
+        JString("18"))))))
+
+    assert(representation.attributes.get == expectedAttributes)
+  }
+
+
+  it should "transform object properties" in {
+
+    val json =
+      """
+        |{
+        |    "object": {
+        |        "name": "myObject",
+        |        "status": "cancelled"
+        |    }
+        |}
+      """.stripMargin
+
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+
+    val expectedAttributes = JObject(Map(
+    ("object", JObject(Map(
+      ("name", JString("myObject")),
+      ("status", JString("cancelled")))))))
+
+    assert(representation.attributes.get == expectedAttributes)
+  }
+
+  it should "transform arrays that contains objects" in {
+
+    val json =
+      """
+        |{
+        |    "objects": [
+        |        {
+        |            "name": "myObject1",
+        |            "status": "cancelled"
+        |        },
+        |        {
+        |            "name": "myObject2",
+        |            "status": "cancelled"
+        |        }
+        |    ]
+        |}
+      """.stripMargin
+
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+
+    val expectedAttributes = JObject(Map(
+    ("objects", JArray(List(
+     JObject(Map(
+      ("name", JString("myObject1")),
+      ("status", JString("cancelled")))),
+     JObject(Map(
+      ("name", JString("myObject2")),
+      ("status", JString("cancelled")))))
+      ))))
+
+    assert(representation.attributes.get == expectedAttributes)
+  }
 
 }
