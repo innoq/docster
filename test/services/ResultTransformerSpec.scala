@@ -27,7 +27,7 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
     val result = Results.Ok
     val request = ProxyRequest(uri = "naything").putHeader(accept(List("application/hal+json", "text/html;p=0.9")))
 
-    val transformedResult = transformResult(Future.successful(result), request, Map.empty)
+    val transformedResult = transformResult(Future.successful(result), request, List.empty)
 
     assert(transformedResult.futureValue === result)
   }
@@ -37,7 +37,7 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
     val result = Results.Ok.withHeaders(accept("application/innoq+json"))
     val request = ProxyRequest(uri = "naything").putHeader(accept(List("application/hal+json;p=0.9", "text/html")))
 
-    val transformedResult = transformResult(Future.successful(result), request, Map.empty)
+    val transformedResult = transformResult(Future.successful(result), request, List.empty)
 
     assert(transformedResult.futureValue === result)
   }
@@ -48,17 +48,18 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
     val result = Results.Ok("{}").withHeaders(("Content-Type", halJson))
     val request = ProxyRequest(uri = "naything").putHeader(accept(List(halJson + ";q=0.9", "text/html")))
 
-    val halTransformer = mock(classOf[Transformer])
-    val sirenTransformer = mock(classOf[Transformer])
+    val halTransformer = mock(classOf[ContentTypeTransformer])
+    when(halTransformer.from).thenReturn("application/hal+json")
+    val sirenTransformer = mock(classOf[ContentTypeTransformer])
+    when(sirenTransformer.from).thenReturn("application/vnd.siren+json")
 
     val representation = Representation(ANY, navigations = List.empty)
     when(halTransformer.transform(MockitoMatchers.any, MockitoMatchers.any)).thenReturn(representation)
 
-    val transformedResult = transformResult(Future.successful(result), request, Map((halJson, halTransformer), ("application/vnd.siren+json", sirenTransformer)))
+    val transformedResult = transformResult(Future.successful(result), request, List(halTransformer, sirenTransformer))
 
     assert(Helpers.status(transformedResult) == 200)
     verify(halTransformer).transform(MockitoMatchers.any, MockitoMatchers.any)
   }
-
 
 }

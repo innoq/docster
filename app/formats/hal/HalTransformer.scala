@@ -9,7 +9,10 @@ import services._
 
 import scala.collection.JavaConversions._
 
-object HalTransformer extends Transformer {
+/**
+ * Transforms <code>application/hal+json</code into <code>text/html</code>
+ */
+object HalTransformer extends ContentTypeTransformer {
 
   implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
@@ -62,5 +65,5 @@ object HalTransformer extends Transformer {
     Representation(name, navigations = links, attributes = atts, embeddedRepresentations = embeddeds)
   }
 
-
+  override def from: String = "application/hal+json"
 }
