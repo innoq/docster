@@ -1,7 +1,5 @@
 package formats.hal
 
-import java.net.URI
-
 import org.scalatest.FlatSpec
 import services._
 
@@ -76,9 +74,9 @@ class HalTransformerSpec extends FlatSpec {
   it should " add all links to a relations section" in {
     val documentation = HalTransformer.transform(anyRequest, ProxyResponse(body = springRestJson))
     val navigations = List(
-      Link("self", URI.create("http://localhost:8080/orders")),
-      Link("profile", URI.create("http://localhost:8080/profile/orders")),
-      Link("search", URI.create("http://localhost:8080/orders/search"))
+      Relation("self", "http://localhost:8080/orders"),
+      Relation("profile", "http://localhost:8080/profile/orders"),
+      Relation("search", "http://localhost:8080/orders/search")
     )
 
     assert(documentation.navigations == navigations)
@@ -270,9 +268,9 @@ class HalTransformerSpec extends FlatSpec {
     val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
 
     val expectedAttributes = JObject(Map(
-      ("object", JObject(Map(
-        ("name", JString("myObject")),
-        ("status", JString("cancelled")))))))
+    ("object", JObject(Map(
+      ("name", JString("myObject")),
+      ("status", JString("cancelled")))))))
 
     assert(representation.attributes.get == expectedAttributes)
   }
@@ -298,13 +296,13 @@ class HalTransformerSpec extends FlatSpec {
     val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
 
     val expectedAttributes = JObject(Map(
-      ("objects", JArray(List(
-        JObject(Map(
-          ("name", JString("myObject1")),
-          ("status", JString("cancelled")))),
-        JObject(Map(
-          ("name", JString("myObject2")),
-          ("status", JString("cancelled")))))
+    ("objects", JArray(List(
+     JObject(Map(
+      ("name", JString("myObject1")),
+      ("status", JString("cancelled")))),
+     JObject(Map(
+      ("name", JString("myObject2")),
+      ("status", JString("cancelled")))))
       ))))
 
     assert(representation.attributes.get == expectedAttributes)
