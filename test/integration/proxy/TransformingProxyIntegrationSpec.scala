@@ -44,7 +44,6 @@ class TransformingProxyIntegrationSpec extends FlatSpec {
       assert(status(result) == 200 && headers(result).get("Content-Type").get.contains("text/html"))
     })
 
-
   }
 
 

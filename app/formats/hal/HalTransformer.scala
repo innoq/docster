@@ -5,6 +5,7 @@ import java.util
 
 import com.theoryinpractise.halbuilder.api.{ReadableRepresentation, RepresentationFactory}
 import com.theoryinpractise.halbuilder.json.JsonRepresentationFactory
+import model._
 import services._
 
 import scala.collection.JavaConversions._
@@ -62,7 +63,7 @@ object HalTransformer extends ContentTypeTransformer {
       case (key, halRepresentation: util.Collection[ReadableRepresentation]) => (key, halRepresentation.toList.map(toRepresentation))
     }
 
-    Representation(name, navigations = links, attributes = atts, embeddedRepresentations = embeddeds)
+    Representation(name, relations = links, attributes = atts, embeddedRepresentations = embeddeds)
   }
 
   override def from: String = "application/hal+json"

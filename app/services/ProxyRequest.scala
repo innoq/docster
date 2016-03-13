@@ -1,10 +1,21 @@
 package services
 
+import java.net.URI
+
 import play.api.http.MediaRange
 import services.MediaRanges._
 
-
-case class ProxyRequest(method: String = "GET", uri: String, headers: Map[String, Seq[String]] = Map.empty, body: String = "") {
+/**
+ * Wrapper for the original client request which should be forwarded to the configured server.
+ *
+ * Used instead of plays request object to have a more simpler and easier to test value object.
+ *
+ * @param method HTTP method
+ * @param uri target uri
+ * @param headers yes the headers
+ * @param body and the body
+ */
+case class ProxyRequest(method: String = "GET", uri: URI, headers: Map[String, Seq[String]] = Map.empty, body: String = "") {
 
   lazy val mediaRanges = headers.get("Accept").map(toMediaRanges).getOrElse(List.empty).reverse
 

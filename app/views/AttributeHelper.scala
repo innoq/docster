@@ -1,13 +1,19 @@
 package views
 
-import services.{JString, JArray, JObject, Attribute}
+import model.{Attribute, JArray, JObject, JString}
 
+/**
+ * Helper to render attributes.
+ *
+ * Not part of the template as it's a bit too complex and needs testing.
+ * Another approach would be to have recursive templates (see representationSection), maybe that would be better...
+ */
 object AttributeHelper {
 
   def renderAttribute(rootAttribute: JObject): String = {
 
     //TODO make tail recursive by explicitly modeling object start end end tags (at least end tags)
-    //    @tailrec
+    //@tailrec
     def _renderAttribute(attribute: Attribute, acc: StringBuilder): StringBuilder = {
       attribute match {
         case JObject(fields) =>

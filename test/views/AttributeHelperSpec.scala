@@ -1,7 +1,7 @@
 package views
 
+import model.{JArray, JObject, JString}
 import org.scalatest.FlatSpec
-import services.{JString, JArray, JObject}
 
 class AttributeHelperSpec extends FlatSpec {
 

@@ -12,7 +12,7 @@ case object ServerGateway {
   implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
   def forwardRequestToServer(request: ProxyRequest, ws: WSClient): Future[Result] = {
-    val wsRequest = ws.url(request.uri)
+    val wsRequest = ws.url(request.uri.toString)
       .withHeaders(request.simpleHeaderMap.toList: _*)
       .withMethod(request.method)
       .withBody(request.body)

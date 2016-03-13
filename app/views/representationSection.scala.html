@@ -1,4 +1,4 @@
-@import services.Representation
+@import model._
 @import views.AttributeHelper
 
 @(representation: Representation)
@@ -9,7 +9,7 @@
 
 <section id="relations" class="panel-group">
     <h2 id="relations-title">Relations</h2>
-    @for(relation <- representation.navigations) {
+    @for(relation <- representation.relations) {
         <div class="relation panel panel-default">
             <div class="panel-heading">@relation.key</div>
             <div class="panel-body">

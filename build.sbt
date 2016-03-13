@@ -17,7 +17,8 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.6" % "test",
   "org.mockito" % "mockito-all" % "1.10.19",
   "org.jsoup" % "jsoup" % "1.8.3",
-  "com.theoryinpractise" % "halbuilder-standard" % "4.0.1"
+  "com.theoryinpractise" % "halbuilder-standard" % "4.0.1",
+  "com.softwaremill.quicklens" % "quicklens_2.11" % "1.4.6"
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"

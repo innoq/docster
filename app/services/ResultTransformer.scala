@@ -1,6 +1,8 @@
 package services
 
+import com.softwaremill.quicklens._
 import formats.hal.HalTransformer
+import model.Representation
 import play.api.mvc.{Result, Results}
 
 import scala.concurrent.Future
@@ -21,6 +23,22 @@ case object ResultTransformer {
 
   def defaultTransformers = List(HalTransformer)
 
+  def transformUris(representation: Representation, host: String): Representation = {
+    representation.modify(_.relations.each.uri).using(toRelativeUri(_, host))
+  }
+
+  def toRelativeUri(uriToTransform: String, host: String): String = {
+
+    def _toRelativeUri = {
+      "(?:https?:\\/\\/.*:?\\d*\\/)(.*)".r.findFirstMatchIn(uriToTransform).map(_.group(1)).getOrElse(uriToTransform)
+    }
+
+    val uriHost = "https?:\\/\\/(.*:?\\d*)(?:\\/)".r.findFirstMatchIn(uriToTransform).map(_.group(1))
+    val sameHost =  uriHost.contains(host)
+
+    if(sameHost) _toRelativeUri else uriToTransform
+  }
+
   def transformResult(result: Future[Result], proxyRequest: ProxyRequest, transformers: List[ContentTypeTransformer] = defaultTransformers): Future[Result] = {
 
     def findTransformerForContentType(result: Result): Option[ContentTypeTransformer] = {
@@ -31,7 +49,7 @@ case object ResultTransformer {
     }
 
     def toResult(representation: Representation, status: Int): Result = {
-      Results.Ok(views.html.representationPage(representation))
+      Results.Ok(views.html.representationPage(transformUris(representation, proxyRequest.uri.getHost)))
     }
 
     result.map { (result: Result) =>

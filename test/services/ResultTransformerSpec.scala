@@ -1,5 +1,8 @@
 package services
 
+import java.net.URI
+
+import model.{Relation, Representation}
 import org.mockito.Mockito._
 import org.scalatest.FlatSpec
 import org.scalatest.concurrent.ScalaFutures
@@ -16,6 +19,8 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
 
   val ANY = "anything"
 
+  val ANY_URI = URI.create("http://example.com")
+
   implicit val defaultPatience = PatienceConfig(timeout = Span(20, Minutes), interval = Span(5, Millis))
 
   behavior of "a result transformer"
@@ -25,7 +30,7 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
   it should "return the given result if client not primarily aksed for html" in {
 
     val result = Results.Ok
-    val request = ProxyRequest(uri = "naything").putHeader(accept(List("application/hal+json", "text/html;p=0.9")))
+    val request = ProxyRequest(uri = ANY_URI).putHeader(accept(List("application/hal+json", "text/html;p=0.9")))
 
     val transformedResult = transformResult(Future.successful(result), request, List.empty)
 
@@ -35,7 +40,7 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
   it should "return the given result if client asked primarily for html but a not known json type was returned" in {
 
     val result = Results.Ok.withHeaders(accept("application/innoq+json"))
-    val request = ProxyRequest(uri = "naything").putHeader(accept(List("application/hal+json;p=0.9", "text/html")))
+    val request = ProxyRequest(uri = ANY_URI).putHeader(accept(List("application/hal+json;p=0.9", "text/html")))
 
     val transformedResult = transformResult(Future.successful(result), request, List.empty)
 
@@ -46,14 +51,14 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
 
     val halJson = "application/hal+json"
     val result = Results.Ok("{}").withHeaders(("Content-Type", halJson))
-    val request = ProxyRequest(uri = "naything").putHeader(accept(List(halJson + ";q=0.9", "text/html")))
+    val request = ProxyRequest(uri = ANY_URI).putHeader(accept(List(halJson + ";q=0.9", "text/html")))
 
     val halTransformer = mock(classOf[ContentTypeTransformer])
     when(halTransformer.from).thenReturn("application/hal+json")
     val sirenTransformer = mock(classOf[ContentTypeTransformer])
     when(sirenTransformer.from).thenReturn("application/vnd.siren+json")
 
-    val representation = Representation(ANY, navigations = List.empty)
+    val representation = Representation(ANY, relations = List.empty)
     when(halTransformer.transform(MockitoMatchers.any, MockitoMatchers.any)).thenReturn(representation)
 
     val transformedResult = transformResult(Future.successful(result), request, List(halTransformer, sirenTransformer))
@@ -61,5 +66,23 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
     assert(Helpers.status(transformedResult) == 200)
     verify(halTransformer).transform(MockitoMatchers.any, MockitoMatchers.any)
   }
+
+  it should "transform absolute uris to the target host to relative ones" in {
+
+    val relations = List(Relation("relation1", "https://myhost/orders"))
+
+    val result = transformUris(Representation("anyName", relations = relations), "myhost")
+
+    assert(result.relations.head.uri == "orders")
+  }
+
+ it should "not transform absolute uris to a different host" in {
+
+   val relations = List(Relation("relationToDifferentHost", "http://otherHost/orders"))
+
+   val result = transformUris(Representation("anyName", relations = relations), "http://myhost")
+
+   assert(result.relations.head.uri == "http://otherHost/orders")
+ }
 
 }

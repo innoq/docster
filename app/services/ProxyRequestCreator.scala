@@ -14,7 +14,7 @@ case object ProxyRequestCreator {
 
   def mapToForwardingRequest(request: Request[String], requestPath: String, docsterConfiguration: DocsterConfiguration): Try[ProxyRequest] = {
     calculateServerUri(requestPath, docsterConfiguration).map { uri =>
-      val proxyRequest = ProxyRequest(request.method, uri.toString, request.headers.toMap, request.body).putHeader("host", List(uri.getHost))
+      val proxyRequest = ProxyRequest(request.method, uri, request.headers.toMap, request.body).putHeader("host", List(uri.getHost))
       addJsonHypermediaContentTypes(proxyRequest)
     }
   }

@@ -1,11 +1,14 @@
 package formats.hal
 
+import java.net.URI
+
+import model.{Relation, JArray, JObject, JString}
 import org.scalatest.FlatSpec
 import services._
 
 class HalTransformerSpec extends FlatSpec {
 
-  val anyRequest: ProxyRequest = ProxyRequest(uri = "something")
+  val anyRequest: ProxyRequest = ProxyRequest(uri = URI.create("http://example.com"))
 
   val springRestJson =
     """
@@ -79,7 +82,7 @@ class HalTransformerSpec extends FlatSpec {
       Relation("search", "http://localhost:8080/orders/search")
     )
 
-    assert(documentation.navigations == navigations)
+    assert(documentation.relations == navigations)
   }
 
 
