@@ -15,7 +15,7 @@ import services.MediaRanges._
  * @param headers yes the headers
  * @param body and the body
  */
-case class ProxyRequest(method: String = "GET", uri: URI, headers: Map[String, Seq[String]] = Map.empty, body: String = "") {
+case class ProxyRequest(method: String = "GET", uri: URI, headers: Map[String, Seq[String]] = Map.empty, body: Option[String] = None) {
 
   lazy val mediaRanges = headers.get("Accept").map(toMediaRanges).getOrElse(List.empty).reverse
 

@@ -24,11 +24,10 @@ case object ResultTransformer {
   def defaultTransformers = List(HalTransformer)
 
   def transformUris(representation: Representation, host: String): Representation = {
-    def updateEmbeddedRepresentations: Map[String, List[Representation]] = {
-      representation.embeddedRepresentations.mapValues((representations) => representations.map(transformUris(_, host)))
-    }
 
-    val updatedChilds = updateEmbeddedRepresentations
+    def updateEmbeddedRepresentations() = representation.embeddedRepresentations.mapValues((representations) => representations.map(transformUris(_, host)))
+
+    val updatedChilds = updateEmbeddedRepresentations()
 
     representation
       .modify(_.embeddedRepresentations).setTo(updatedChilds)
@@ -58,15 +57,30 @@ case object ResultTransformer {
       } yield transformer
     }
 
-    def toResult(representation: Representation, status: Int): Result = {
-      Results.Ok(views.html.representationPage(transformUris(representation, proxyRequest.uri.getHost)))
+    def toDocumentation(representation: Option[Representation], request: ProxyRequest, response: ProxyResponse): Option[Documentation] = {
+      representation
+        .map(transformUris(_, proxyRequest.uri.getHost))
+        .map(Documentation(_, request))
+    }
+
+    def toRepresentation(transformer: Option[ContentTypeTransformer], request: ProxyRequest, response: ProxyResponse): Option[Representation] = {
+      transformer.map(_.transform(proxyRequest, response))
+    }
+
+    def toResult(documentation: Option[Documentation], request: ProxyRequest, response: ProxyResponse): Option[Result] = {
+      documentation.map { documentation =>
+        Results.Ok(views.html.documentation(documentation))
+      }
     }
 
     result.map { (result: Result) =>
       if (proxyRequest.mimeTypeHasHigherOrEqualPrecedence("text/html", transformers.map(_.from))) {
+        val proxyResponse = ProxyResponse(result)
         val transformer = findTransformerForContentType(result)
-        val representation = transformer.map(_.transform(proxyRequest, ProxyResponse(result)))
-        representation.map(toResult(_, result.header.status)).getOrElse(result)
+        val representation = toRepresentation(transformer, proxyRequest, proxyResponse)
+        val documentation = toDocumentation(representation, proxyRequest, proxyResponse)
+        val transformedResult = toResult(documentation, proxyRequest, proxyResponse)
+        transformedResult.getOrElse(result)
       } else {
         result
       }

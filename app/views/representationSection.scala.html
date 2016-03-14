@@ -3,10 +3,6 @@
 
 @(representation: Representation)
 
-<section id="overview">
-    <h1 id="overview-title" class="page-header">@representation.name Resource</h1>
-</section>
-
 <section id="relations" class="panel-group">
     <h2 id="relations-title">Relations</h2>
     @for(relation <- representation.relations) {
@@ -26,7 +22,7 @@
             </div>
         </div>
     }
-</section>
+    </section>
 
 <section id="attributes" class="panel-group">
     <h2 id="relations-title">Attributes</h2>

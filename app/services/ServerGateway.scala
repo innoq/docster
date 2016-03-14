@@ -20,7 +20,7 @@ class ServerGateway @Inject()(configuration: Configuration) {
     val wsRequest = ws.url(request.uri.toString)
       .withHeaders(request.simpleHeaderMap.toList: _*)
       .withMethod(request.method)
-      .withBody(request.body)
+      .withBody(request.body.getOrElse(""))
       .withRequestTimeout(configuration.getLong("server.timeout").getOrElse(60000))
 
     wsRequest.stream().map {

@@ -13,8 +13,16 @@ case object ProxyRequestCreator {
   val HTML_MIME_TYPE = "text/html"
 
   def mapToForwardingRequest(request: Request[String], requestPath: String, docsterConfiguration: DocsterDB): Try[ProxyRequest] = {
+
+    def toProxyRequestBody(string: String) = {
+      string match {
+        case "" => None
+        case notEmpty => Some(notEmpty)
+      }
+    }
+
     calculateServerUri(requestPath, docsterConfiguration).map { uri =>
-      val proxyRequest = ProxyRequest(request.method, uri, request.headers.toMap, request.body).putHeader("host", List(uri.getHost))
+      val proxyRequest = ProxyRequest(request.method, uri, request.headers.toMap, toProxyRequestBody(request.body)).putHeader("host", List(uri.getHost))
       addJsonHypermediaContentTypes(proxyRequest)
     }
   }
