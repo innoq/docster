@@ -1,13 +1,18 @@
 package services
 
+import javax.inject.Inject
+
+import play.api.Configuration
 import play.api.libs.iteratee.Enumerator
-import play.api.libs.ws.{WSClient, WSResponseHeaders}
+import play.api.libs.ws.{WSResponseHeaders, WSClient}
 import play.api.mvc.Result
 import play.api.mvc.Results.Status
 
 import scala.concurrent.Future
 
-case object ServerGateway {
+object ServerGateway
+
+class ServerGateway @Inject()(configuration: Configuration) {
 
   implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
@@ -16,7 +21,7 @@ case object ServerGateway {
       .withHeaders(request.simpleHeaderMap.toList: _*)
       .withMethod(request.method)
       .withBody(request.body)
-      .withRequestTimeout(1000)
+      .withRequestTimeout(configuration.getLong("server.timeout").getOrElse(60000))
 
     wsRequest.stream().map {
       case (headers: WSResponseHeaders, body: Enumerator[Array[Byte]]) =>

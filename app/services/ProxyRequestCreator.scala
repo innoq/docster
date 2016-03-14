@@ -12,14 +12,14 @@ case object ProxyRequestCreator {
   val HAL_MIME_TYPE = "application/hal+json"
   val HTML_MIME_TYPE = "text/html"
 
-  def mapToForwardingRequest(request: Request[String], requestPath: String, docsterConfiguration: DocsterConfiguration): Try[ProxyRequest] = {
+  def mapToForwardingRequest(request: Request[String], requestPath: String, docsterConfiguration: DocsterDB): Try[ProxyRequest] = {
     calculateServerUri(requestPath, docsterConfiguration).map { uri =>
       val proxyRequest = ProxyRequest(request.method, uri, request.headers.toMap, request.body).putHeader("host", List(uri.getHost))
       addJsonHypermediaContentTypes(proxyRequest)
     }
   }
 
-  private def calculateServerUri(path: String, docsterConfiguration: DocsterConfiguration): Try[URI] = {
+  private def calculateServerUri(path: String, docsterConfiguration: DocsterDB): Try[URI] = {
     docsterConfiguration.serverBaseUri match {
       case Some(basePath) => Success(URI.create(basePath + "/" + path))
       case None => Failure(ServerBaseUriNotConfigured())

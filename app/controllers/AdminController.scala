@@ -4,12 +4,12 @@ import java.net.URI
 import javax.inject.Inject
 
 import play.api.mvc.{Action, Controller}
-import services.DocsterConfiguration
+import services.DocsterDB
 
 import scala.concurrent.Future
 
 
-class AdminController @Inject()(docsterConfig: DocsterConfiguration) extends Controller {
+class AdminController @Inject()(docsterConfig: DocsterDB) extends Controller {
 
   def adminConsole = Action.async { implicit request =>
     Future.successful(Ok(views.html.admin(docsterConfig)))

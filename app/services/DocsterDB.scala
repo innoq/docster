@@ -6,7 +6,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 
 @Singleton
-class DocsterConfiguration @Inject()(configuration: Configuration) {
+class DocsterDB @Inject()(configuration: Configuration) {
 
   var serverBaseUri: Option[URI] = configuration.getString("server.uri") match {
     case Some("unset") => None

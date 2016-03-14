@@ -7,20 +7,19 @@ import play.api.libs.ws._
 import play.api.mvc._
 import services.ProxyRequestCreator.mapToForwardingRequest
 import services.ResultTransformer.transformResult
-import services.ServerGateway.forwardRequestToServer
-import services.{DocsterConfiguration, ServerBaseUriNotConfigured}
+import services.{DocsterDB, ServerBaseUriNotConfigured, ServerGateway}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-class ProxyController @Inject()(ws: WSClient)(docsterConfig: DocsterConfiguration) extends Controller {
+class ProxyController @Inject()(ws: WSClient)(configStore: DocsterDB, serverGateway: ServerGateway) extends Controller {
 
   implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
   def proxy(requestPath: String) = Action.async(parse.tolerantText) { originalRequest =>
     val result: Try[Future[Result]] = for {
-      forwardingRequest <- mapToForwardingRequest(originalRequest, requestPath, docsterConfig)
-      serverResponse <- Try(forwardRequestToServer(forwardingRequest, ws))
+      forwardingRequest <- mapToForwardingRequest(originalRequest, requestPath, configStore)
+      serverResponse <- Try(serverGateway.forwardRequestToServer(forwardingRequest, ws))
       transformedResult <- Try(transformResult(serverResponse, forwardingRequest))
     } yield transformedResult
 
