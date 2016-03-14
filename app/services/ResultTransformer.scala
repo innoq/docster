@@ -24,19 +24,29 @@ case object ResultTransformer {
   def defaultTransformers = List(HalTransformer)
 
   def transformUris(representation: Representation, host: String): Representation = {
-    representation.modify(_.relations.each.uri).using(toRelativeUri(_, host))
+    def updateEmbeddedRepresentations: Map[String, List[Representation]] = {
+      representation.embeddedRepresentations.mapValues((representations) => representations.map(transformUris(_, host)))
+    }
+
+    val updatedChilds = updateEmbeddedRepresentations
+
+    representation
+      .modify(_.embeddedRepresentations).setTo(updatedChilds)
+      .modify(_.relations.each.uri).using(toRelativeUri(_, host))
   }
 
   def toRelativeUri(uriToTransform: String, host: String): String = {
 
+    def uriPattern = "https?:\\/\\/(.*?:?\\d*)(?:\\/)(.*)".r
+
     def _toRelativeUri = {
-      "(?:https?:\\/\\/.*:?\\d*\\/)(.*)".r.findFirstMatchIn(uriToTransform).map(_.group(1)).getOrElse(uriToTransform)
+      uriPattern.findFirstMatchIn(uriToTransform).map(_.group(2)).getOrElse(uriToTransform)
     }
 
-    val uriHost = "https?:\\/\\/(.*:?\\d*)(?:\\/)".r.findFirstMatchIn(uriToTransform).map(_.group(1))
-    val sameHost =  uriHost.contains(host)
+    val uriHost = uriPattern.findFirstMatchIn(uriToTransform).map(_.group(1))
+    val sameHost = uriHost.contains(host)
 
-    if(sameHost) _toRelativeUri else uriToTransform
+    if (sameHost) _toRelativeUri else uriToTransform
   }
 
   def transformResult(result: Future[Result], proxyRequest: ProxyRequest, transformers: List[ContentTypeTransformer] = defaultTransformers): Future[Result] = {

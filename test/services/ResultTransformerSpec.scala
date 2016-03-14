@@ -69,20 +69,30 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
 
   it should "transform absolute uris to the target host to relative ones" in {
 
-    val relations = List(Relation("relation1", "https://myhost/orders"))
+    val relations = List(Relation("relation1", "https://myhost/orders/0"))
 
     val result = transformUris(Representation("anyName", relations = relations), "myhost")
 
-    assert(result.relations.head.uri == "orders")
+    assert(result.relations.head.uri == "orders/0")
   }
 
- it should "not transform absolute uris to a different host" in {
 
-   val relations = List(Relation("relationToDifferentHost", "http://otherHost/orders"))
+  it should "transform absolute uris to the target host to relative ones also for embedded representations" in {
 
-   val result = transformUris(Representation("anyName", relations = relations), "http://myhost")
+    val embeddedRepresentation = Representation("anyName", relations = List(Relation("relation1", "https://myhost/orders")))
 
-   assert(result.relations.head.uri == "http://otherHost/orders")
- }
+    val result = transformUris(Representation(ANY, embeddedRepresentations = Map((ANY, List(embeddedRepresentation)))), "myhost")
+
+    assert(result.embeddedRepresentations.head._2.head.relations.head.uri == "orders")
+  }
+
+  it should "not transform absolute uris to a different host" in {
+
+    val relations = List(Relation("relationToDifferentHost", "http://otherHost/orders"))
+
+    val result = transformUris(Representation("anyName", relations = relations), "http://myhost")
+
+    assert(result.relations.head.uri == "http://otherHost/orders")
+  }
 
 }
