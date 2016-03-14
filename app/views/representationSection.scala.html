@@ -1,10 +1,10 @@
 @import model._
 @import views.AttributeHelper
 
-@(representation: Representation)
+@(representation: Representation, hierarchie: Int)
 
 <section id="relations" class="panel-group">
-    <h2 id="relations-title">Relations</h2>
+    <h@hierarchie id="relations-title-@representation.id">Relations</h@hierarchie>
     @for(relation <- representation.relations) {
         <div class="relation panel panel-default">
             <div class="panel-heading">@relation.key</div>
@@ -22,27 +22,33 @@
             </div>
         </div>
     }
-    </section>
+</section>
 
 <section id="attributes" class="panel-group">
-    <h2 id="relations-title">Attributes</h2>
+    <h@hierarchie id="attributes-title-@representation.id">Attributes</h@hierarchie>
     <div class="relation panel panel-default">
         <div class="panel-body">
         @if(representation.attributes) {
             @Html(AttributeHelper.renderAttribute(representation.attributes.get))
+        } else {
+            <p class="text-left"><em>none</em></p>
         }
         </div>
     </div>
 </section>
 
+
 <section id="entities" class="panel-group">
-    <h2 id="relations-title">Embedded Entities</h2>
+    <h@hierarchie id="entities-title-@representation.id">Embedded Entities</h@hierarchie>
     <div class="relation panel panel-default">
         <div class="panel-body">
+            @if(representation.embeddedRepresentations.isEmpty){
+                <p class="text-left"><em>none</em></p>
+            }
         @for(pair <- representation.embeddedRepresentations) {
-            <h2>Entity: @pair._1</h2>
             @for(embeddedRepresentation <- pair._2) {
-                @this(embeddedRepresentation)
+                <h@{hierarchie + 1} id="entity-title-@embeddedRepresentation.id">Entity: @{pair._1}:@embeddedRepresentation.name </h@{hierarchie + 1}>
+                @this(embeddedRepresentation, hierarchie + 1)
             }
         }
         </div>

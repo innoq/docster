@@ -1,6 +1,7 @@
 package model
 
 import java.net.URI
+import java.util.UUID
 
 /**
  * Meta model of an hypermedia content type. We can use this to bridge between different formats.
@@ -12,7 +13,7 @@ import java.net.URI
  * @param description human readable description
  * @param embeddedRepresentations representations are recursive data structures
  */
-case class Representation(name: String, attributes: Option[JObject] = None, relations: Seq[Relation] = List.empty, actions: Seq[Action] = List.empty, description: Option[Description] = None, embeddedRepresentations: Map[String, List[Representation]] = Map.empty) extends Attribute
+case class Representation(name: String, id: String = UUID.randomUUID().toString,  attributes: Option[JObject] = None, relations: Seq[Relation] = List.empty, actions: Seq[Action] = List.empty, description: Option[Description] = None, embeddedRepresentations: Map[String, List[Representation]] = Map.empty) extends Attribute
 
 trait Attribute
 

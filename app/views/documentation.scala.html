@@ -8,96 +8,114 @@
         <title>Docster - @documentation.representation.name</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css">
+        <link rel="stylesheet" href="https://cdn.rawgit.com/afeld/bootstrap-toc/v0.3.0/dist/bootstrap-toc.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js"></script>
+        <script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v0.3.0/dist/bootstrap-toc.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script>
     </head>
 </html>
-<body>
+<body data-spy="scroll" data-target="#toc">
 
     <main class="container">
 
-        <section id="overview">
-            <h1 id="overview-title" class="page-header">@documentation.representation.name Resource</h1>
-        </section>
+        <div class="row">
+                <!-- sidebar, which will move to the top on a small screen -->
+            <div class="col-sm-3">
+                <nav id="toc" data-spy="affix" data-toggle="toc"></nav>
+            </div>
+                <!-- main content area -->
+            <div class="col-sm-9">
 
 
-        <div class="representation">
-        @representationSection(documentation.representation)
-        </div>
+                <section id="overview">
+                    <h1 id="overview-title" class="page-header">@documentation.representation.name Resource</h1>
+                </section>
 
-        <div class="request">
 
-            <h2 id="request-title">Original Request</h2>
+                <div class="representation">
+                @representationSection(documentation.representation, 2)
+                </div>
 
-            <section class="panel-group">
+                <div class="request">
 
-                <div class="request-header panel panel-default">
-                    <div class="panel-heading">Header</div>
-                    <div class="panel-body">
-                        <ul>
-                            <ol>Method: @documentation.proxyRequest.method</ol>
-                            <ol>URI: <a href="@documentation.proxyRequest.uri">@documentation.proxyRequest.uri</a></ol>
-                            @for(header <- documentation.proxyRequest.simpleHeaderMap) {
-                                <ol>@header._1: @header._2</ol>
+                    <h2 id="request-title">Original Request</h2>
+
+                    <section class="panel-group">
+
+                        <div class="request-header panel panel-default">
+                            <div class="panel-heading">Header</div>
+                            <div class="panel-body">
+                                <ul>
+                                    <ol>Method: @documentation.proxyRequest.method</ol>
+                                    <ol>URI: <a href="@documentation.proxyRequest.uri">@documentation.proxyRequest.uri</a></ol>
+                                    @for(header <- documentation.proxyRequest.simpleHeaderMap) {
+                                        <ol>@header._1: @header._2</ol>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="request-body panel panel-default">
+                            <div class="panel-heading">Body</div>
+                            <div class="panel-body">
+                            @if(documentation.proxyRequest.body) {
+                                <pre>
+                                    <code>
+                                    @documentation.proxyRequest.body
+                                    </code>
+                                </pre>
+                            } else {
+                                <p class="text-left"><em>none</em></p>
                             }
-                        </ul>
-                    </div>
+                            </div>
+                        </div>
+
+                    </section>
+
                 </div>
 
-                <div class="request-body panel panel-default">
-                    <div class="panel-heading">Body</div>
-                    <div class="panel-body">
-                    @if(documentation.proxyRequest.body) {
-                        <pre>
-                            <code>
-                            @documentation.proxyRequest.body
-                            </code>
-                        </pre>
-                    } else {
-                        <p class="text-center"><em>empty</em></p>
-                    }
-                    </div>
-                </div>
 
-            </section>
+                <div class="response">
 
-        </div>
+                    <h2 id="response-title">Original Response</h2>
 
+                    <section class="panel-group">
 
-        <div class="response">
+                        <div class="response-header panel panel-default">
+                            <div class="panel-heading">Header</div>
+                            <div class="panel-body">
+                                <ul>
+                                    <ol>Status: @documentation.proxyResponse.status</ol>
+                                    @for(header <- documentation.proxyResponse.simpleHeaderMap) {
+                                        <ol>@header._1: @header._2</ol>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
 
-            <h2 id="response-title">Original Response</h2>
-
-            <section class="panel-group">
-
-                <div class="response-header panel panel-default">
-                    <div class="panel-heading">Header</div>
-                    <div class="panel-body">
-                        <ul>
-                            <ol>Status: @documentation.proxyResponse.status</ol>
-                            @for(header <- documentation.proxyResponse.simpleHeaderMap) {
-                                <ol>@header._1: @header._2</ol>
+                        <div class="response-body panel panel-default">
+                            <div class="panel-heading">Body</div>
+                            <div class="panel-body">
+                            @if(documentation.proxyResponse.body) {
+                                <pre>
+                                    <code>
+                                    @documentation.proxyResponse.body
+                                    </code>
+                                </pre>
+                            } else {
+                                <p class="text-left"><em>none</em></p>
                             }
-                        </ul>
-                    </div>
+                            </div>
+                        </div>
+
+                    </section>
+
                 </div>
 
-                <div class="response-body panel panel-default">
-                    <div class="panel-heading">Body</div>
-                    <div class="panel-body">
-                    @if(documentation.proxyResponse.body) {
-                        <pre>
-                            <code>
-                            @documentation.proxyResponse.body
-                            </code>
-                        </pre>
-                    } else {
-                        <p class="text-center"><em>empty</em></p>
-                    }
-                    </div>
-                </div>
+            </div>
 
-            </section>
 
         </div>
 
