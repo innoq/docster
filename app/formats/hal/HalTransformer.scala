@@ -1,7 +1,6 @@
 package formats.hal
 
 import java.io.StringReader
-import java.net.URI
 import java.util
 
 import com.theoryinpractise.halbuilder.api.{Link, ReadableRepresentation, RepresentationFactory}
@@ -41,14 +40,30 @@ object HalTransformer extends ContentTypeTransformer {
   }
 
   def extractTitle(representation: ReadableRepresentation): String = {
+
+    def isNumber(string: String): Boolean = {
+      string.forall(_.isDigit)
+    }
+
     val uriPattern = "https?:\\/\\/(.*?:?\\d*)(\\/.*)".r
     val selfRef: Option[Link] = Option(representation.getResourceLink)
-    val path = selfRef.flatMap{ link =>
+    val path = selfRef.flatMap { link =>
       uriPattern.findFirstMatchIn(link.getHref).map(_.group(2))
     }
     path match {
       case Some("/") => "Home"
-      case Some(s) => s.split("/").lastOption.map(_.capitalize).getOrElse("Undefined")
+      case Some(s) =>
+        val pathParts = s.split("/")
+        val firstNumberPart: Option[String] = pathParts.reverse.find(isNumber)
+        val firstNotNumberPart: Option[String] = pathParts.reverse.find(!isNumber(_))
+        val resultName = (firstNumberPart, firstNotNumberPart) match {
+          case (None, None) => "Undefined"
+          case (None, Some(word)) => word
+          case (Some(number), None) => number
+          case (Some(number), Some(word)) => s"$word $number"
+        }
+        resultName.trim.capitalize
+
       case None => "Undefined"
     }
   }
