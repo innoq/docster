@@ -36,7 +36,7 @@ case object ResultTransformer {
 
   def toRelativeUri(uriToTransform: String, host: String): String = {
 
-    def uriPattern = "https?:\\/\\/(.*?:?\\d*)(?:\\/)(.*)".r
+    def uriPattern = "https?:\\/\\/(.*?:?\\d*)(\\/.*)".r
 
     def _toRelativeUri = {
       uriPattern.findFirstMatchIn(uriToTransform).map(_.group(2)).getOrElse(uriToTransform)

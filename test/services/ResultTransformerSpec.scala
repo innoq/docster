@@ -73,7 +73,7 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
 
     val result = transformUris(Representation("anyName", relations = relations), "myhost")
 
-    assert(result.relations.head.uri == "orders/0")
+    assert(result.relations.head.uri == "/orders/0")
   }
 
 
@@ -83,7 +83,7 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
 
     val result = transformUris(Representation(ANY, embeddedRepresentations = Map((ANY, List(embeddedRepresentation)))), "myhost")
 
-    assert(result.embeddedRepresentations.head._2.head.relations.head.uri == "orders")
+    assert(result.embeddedRepresentations.head._2.head.relations.head.uri == "/orders")
   }
 
   it should "not transform absolute uris to a different host" in {
