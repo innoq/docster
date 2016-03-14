@@ -53,14 +53,14 @@ object HalTransformer extends ContentTypeTransformer {
     path match {
       case Some("/") => "Home"
       case Some(s) =>
-        val pathParts = s.split("/")
-        val firstNumberPart: Option[String] = pathParts.reverse.find(isNumber)
+        val pathParts = s.split("/").filter(_ != "")
+        val lastPathSegmentAsNumber: Option[String] = pathParts.reverse.headOption.find(isNumber)
         val firstNotNumberPart: Option[String] = pathParts.reverse.find(!isNumber(_))
-        val resultName = (firstNumberPart, firstNotNumberPart) match {
+        val resultName = (lastPathSegmentAsNumber, firstNotNumberPart) match {
           case (None, None) => "Undefined"
-          case (None, Some(word)) => word
-          case (Some(number), None) => number
-          case (Some(number), Some(word)) => s"$word $number"
+          case (None, Some(word)) => word // single resource
+          case (Some(number), None) => number // what ever
+          case (Some(number), Some(word)) => s"${word.stripSuffix("s")} #$number" // collection resource
         }
         resultName.trim.capitalize
 

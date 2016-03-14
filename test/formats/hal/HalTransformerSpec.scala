@@ -92,6 +92,40 @@ class HalTransformerSpec extends FlatSpec {
     assert(representation.name == "Home")
   }
 
+  it should "detect collection resources and name them properly" in {
+
+    val json =
+      """
+        |{
+        |    "_links": {
+        |        "self": {
+        |            "href" : "https://it-woodland-47740.herokuapp.com/orders/1000"
+        |        }
+        |    }
+        |}
+      """.stripMargin
+
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    assert(representation.name == "Order #1000")
+  }
+
+  it should "not detect a collection resource if the last path segment is not a number" in {
+
+    val json =
+      """
+        |{
+        |    "_links": {
+        |        "self": {
+        |            "href" : "http://localhost:9000/orders/1054583384/items"
+        |        }
+        |    }
+        |}
+      """.stripMargin
+
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    assert(representation.name == "Items")
+  }
+
   it should " add all links to a relations section" in {
     val documentation = HalTransformer.transform(anyRequest, ProxyResponse(body = springRestJson))
     val navigations = List(

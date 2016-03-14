@@ -47,7 +47,7 @@
             }
         @for(pair <- representation.embeddedRepresentations) {
             @for(embeddedRepresentation <- pair._2) {
-                <h@{hierarchie + 1} id="entity-title-@embeddedRepresentation.id" class="page-header">@{pair._1.capitalize} @embeddedRepresentation.name </h@{hierarchie + 1}>
+                <h@{hierarchie + 1} id="entity-title-@embeddedRepresentation.id" class="page-header">@{pair._1.capitalize}: @embeddedRepresentation.name </h@{hierarchie + 1}>
                 @this(embeddedRepresentation, hierarchie + 2)
             }
         }
