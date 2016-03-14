@@ -2,4 +2,4 @@ package services
 
 import model.Representation
 
-case class Documentation(representation: Representation, proxyRequest: ProxyRequest)
+case class Documentation(representation: Representation, proxyRequest: ProxyRequest, proxyResponse: ProxyResponse)

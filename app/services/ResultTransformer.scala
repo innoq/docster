@@ -60,7 +60,7 @@ case object ResultTransformer {
     def toDocumentation(representation: Option[Representation], request: ProxyRequest, response: ProxyResponse): Option[Documentation] = {
       representation
         .map(transformUris(_, proxyRequest.uri.getHost))
-        .map(Documentation(_, request))
+        .map(Documentation(_, request, response))
     }
 
     def toRepresentation(transformer: Option[ContentTypeTransformer], request: ProxyRequest, response: ProxyResponse): Option[Representation] = {

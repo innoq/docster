@@ -46,7 +46,47 @@
                     <div class="panel-body">
                     @if(documentation.proxyRequest.body) {
                         <pre>
-                        @documentation.proxyRequest.body
+                            <code>
+                            @documentation.proxyRequest.body
+                            </code>
+                        </pre>
+                    } else {
+                        <p class="text-center"><em>empty</em></p>
+                    }
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <div class="response">
+
+            <h2 id="response-title">Original Response</h2>
+
+            <section class="panel-group">
+
+                <div class="response-header panel panel-default">
+                    <div class="panel-heading">Header</div>
+                    <div class="panel-body">
+                        <ul>
+                            <ol>Status: @documentation.proxyResponse.status</ol>
+                            @for(header <- documentation.proxyResponse.simpleHeaderMap) {
+                                <ol>@header._1: @header._2</ol>
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="response-body panel panel-default">
+                    <div class="panel-heading">Body</div>
+                    <div class="panel-body">
+                    @if(documentation.proxyResponse.body) {
+                        <pre>
+                            <code>
+                            @documentation.proxyResponse.body
+                            </code>
                         </pre>
                     } else {
                         <p class="text-center"><em>empty</em></p>
