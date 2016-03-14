@@ -1,6 +1,7 @@
 package formats.hal
 
 import java.io.StringReader
+import java.net.URI
 import java.util
 
 import com.theoryinpractise.halbuilder.api.{ReadableRepresentation, RepresentationFactory}
@@ -39,8 +40,14 @@ object HalTransformer extends ContentTypeTransformer {
     }
   }
 
-  private def extractTitle(representation: ReadableRepresentation): String = {
-    Option(representation.getResourceLink).flatMap(_.getHref.split("/").lastOption).map(_.capitalize).getOrElse("undefined")
+  def extractTitle(representation: ReadableRepresentation): String = {
+    val uriPattern = "https?:\\/\\/(.*?:?\\d*)(\\/.*)".r
+    val path = uriPattern.findFirstMatchIn(representation.getResourceLink.getHref).map(_.group(2))
+    path match {
+      case Some("/") => "Home"
+      case Some(s) => s.split("/").lastOption.map(_.capitalize).getOrElse("Undefined")
+      case None => "Undefined"
+    }
   }
 
   private def extractRelations(representation: ReadableRepresentation): List[Relation] = {

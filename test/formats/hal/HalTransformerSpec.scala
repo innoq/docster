@@ -74,6 +74,24 @@ class HalTransformerSpec extends FlatSpec {
     assert(representation.name == "Orders")
   }
 
+
+  it should "use 'Home' as title if the last path segment is the root resource" in {
+
+    val json =
+      """
+        |{
+        |    "_links": {
+        |        "self": {
+        |            "href" : "https://it-woodland-47740.herokuapp.com/"
+        |        }
+        |    }
+        |}
+      """.stripMargin
+
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    assert(representation.name == "Home")
+  }
+
   it should " add all links to a relations section" in {
     val documentation = HalTransformer.transform(anyRequest, ProxyResponse(body = springRestJson))
     val navigations = List(
@@ -196,7 +214,7 @@ class HalTransformerSpec extends FlatSpec {
       |}
     """.stripMargin
 
-  ignore should "transform embedded entities" in {
+  it should "transform embedded entities" in {
 
     val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = orderServiceJson))
 
