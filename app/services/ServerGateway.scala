@@ -1,20 +1,26 @@
 package services
 
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-import play.api.Configuration
-import play.api.libs.iteratee.Enumerator
-import play.api.libs.ws.{WSResponseHeaders, WSClient}
+import play.api.libs.iteratee.{Enumerator, Iteratee}
+import play.api.libs.ws.{WSClient, WSResponseHeaders}
 import play.api.mvc.Result
 import play.api.mvc.Results.Status
+import play.api.{Configuration, mvc}
 
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 object ServerGateway
 
 class ServerGateway @Inject()(configuration: Configuration) {
 
   implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
+
+  def getBody(body: Enumerator[Array[Byte]], timeout: Long): Array[Byte] =
+    Await.result(body |>>> Iteratee.consume[Array[Byte]](), Duration(timeout, TimeUnit.MILLISECONDS))
+
 
   def forwardRequestToServer(request: ProxyRequest, ws: WSClient): Future[Result] = {
     val wsRequest = ws.url(request.uri.toString)
@@ -25,9 +31,20 @@ class ServerGateway @Inject()(configuration: Configuration) {
 
     wsRequest.stream().map {
       case (headers: WSResponseHeaders, body: Enumerator[Array[Byte]]) =>
-        new Status(headers.status)
-          .chunked(body)
-          .withHeaders(toSimpleHeaderMap(headers.headers).toList: _*)
+        val responseHeader: Map[String, String] = toSimpleHeaderMap(headers.headers)
+        responseHeader.get("Transfer-Encoding") match {
+          case Some("chunked") =>
+            new Status(headers.status)
+              .chunked(body)
+              .withHeaders(responseHeader.toList: _*)
+          case default =>
+            val retrievedBody = getBody(body, configuration.getLong("server.timeout").getOrElse(60000))
+//            Result(ResponseHeader(headers.status, responseHeader), body)
+            mvc.Results.Ok(new String(retrievedBody)).withHeaders(responseHeader.toList: _*)
+            
+        }
+
+
     }
 
   }
