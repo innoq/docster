@@ -10,7 +10,7 @@ class SmokeIntegrationSpec extends FlatSpec {
 
   behavior of "docster"
 
-  it should "be able to transform a public hal response" in {
+  ignore should "be able to transform a public hal response" in {
 
     val app = application("www.mocky.io")
 
