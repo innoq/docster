@@ -1,16 +1,13 @@
 package services
 
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-import play.api.libs.iteratee.{Enumerator, Iteratee}
-import play.api.libs.ws.{WSClient, WSResponseHeaders}
-import play.api.mvc.Result
-import play.api.mvc.Results.Status
-import play.api.{Configuration, mvc}
+import play.api.Configuration
+import play.api.libs.iteratee.Enumerator
+import play.api.libs.ws.WSClient
+import play.api.mvc.{ResponseHeader, Result}
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 object ServerGateway
 
@@ -18,34 +15,26 @@ class ServerGateway @Inject()(configuration: Configuration) {
 
   implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-  def getBody(body: Enumerator[Array[Byte]], timeout: Long): Array[Byte] =
-    Await.result(body |>>> Iteratee.consume[Array[Byte]](), Duration(timeout, TimeUnit.MILLISECONDS))
-
-
   def forwardRequestToServer(request: ProxyRequest, ws: WSClient): Future[Result] = {
-    val wsRequest = ws.url(request.uri.toString)
-      .withHeaders(request.simpleHeaderMap.toList: _*)
-      .withMethod(request.method)
-      .withBody(request.body.getOrElse(""))
-      .withRequestTimeout(configuration.getLong("server.timeout").getOrElse(60000))
-
-    wsRequest.stream().map {
-      case (headers: WSResponseHeaders, body: Enumerator[Array[Byte]]) =>
-        val responseHeader: Map[String, String] = toSimpleHeaderMap(headers.headers)
-        responseHeader.get("Transfer-Encoding") match {
-          case Some("chunked") =>
-            new Status(headers.status)
-              .chunked(body)
-              .withHeaders(responseHeader.toList: _*)
-          case default =>
-            val retrievedBody = getBody(body, configuration.getLong("server.timeout").getOrElse(60000))
-//            Result(ResponseHeader(headers.status, responseHeader), body)
-            mvc.Results.Ok(new String(retrievedBody)).withHeaders(responseHeader.toList: _*)
-            
+    ws.url(request.uri.toString)
+    .withMethod(request.method)
+    .withHeaders(toSimpleHeaderMap(request.headers).toList: _*)
+    .withBody(request.body.getOrElse("")) // Content-Length header will be updated automatically
+    .execute()
+      .map {
+        response => {
+          val body =
+            response.body
+          val headers =
+            response.allHeaders map {
+              // fix the "Content-Lenght" header manually
+              h => (h._1, if (h._1 == "Content-Length")
+                body.length.toString
+              else h._2.head)
+            }
+          Result(ResponseHeader(response.status, headers), Enumerator(body.getBytes))
         }
-
-
-    }
+      }
 
   }
 
