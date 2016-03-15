@@ -16,7 +16,15 @@
                     <dd><a href=@relation.uri>@relation.uri</a></dd>
                     @if(relation.description) {
                         <dt>Description</dt>
-                        <dd>@relation.description</dd>
+                        @relation.description.get.description match {
+                            case Right(uri) => {
+                                <dd><a href="@uri">@uri</a></dd>
+                            }
+                            case Left(text) => {
+                                <dd>@text</dd>
+                            }
+                        }
+
                     }
                 </dl>
             </div>

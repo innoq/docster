@@ -1,6 +1,7 @@
 package formats.hal
 
 import java.io.StringReader
+import java.net.URI
 import java.util
 
 import com.theoryinpractise.halbuilder.api.{Link, ReadableRepresentation, RepresentationFactory}
@@ -39,7 +40,7 @@ object HalTransformer extends ContentTypeTransformer {
     }
   }
 
-  def extractTitle(representation: ReadableRepresentation): String = {
+  private def extractTitle(representation: ReadableRepresentation): String = {
 
     def isNumber(string: String): Boolean = {
       string.forall(_.isDigit)
@@ -69,8 +70,33 @@ object HalTransformer extends ContentTypeTransformer {
   }
 
   private def extractRelations(representation: ReadableRepresentation): List[Relation] = {
+
+    case class Rel(namespace: Option[String], key: String)
+
+
+    def toRel(string: String): Rel = {
+      val groups = string.split(":").toList
+      groups match {
+        case List() => throw new IllegalStateException(s"relation without rel key: $string")
+        case List(a) => Rel(None, a)
+        case List(a, b) => Rel(Some(a), b)
+        case default => throw new IllegalStateException(s"relation without unparseable rel key: $string")
+      }
+    }
+
+    def toDescription(rel: Rel): Option[Description] = {
+      val namespaces: Map[String, String] = representation.getNamespaces.toMap
+      val linkDocUriTemplate: Option[String] = rel.namespace.flatMap(namespaces.get)
+      val linkDocUri: Option[String] = linkDocUriTemplate.map(_.replace("{rel}", rel.key))
+      val descriptionLink: Option[URI] = linkDocUri.map(URI.create)
+      descriptionLink.map { uri: URI =>
+        Description(Right(uri))
+      }
+    }
+
     representation.getLinks.toList.map { link =>
-      Relation(link.getRel, link.getHref)
+      val linkRel = toRel(link.getRel)
+      Relation(linkRel.key, link.getHref, toDescription(linkRel))
     }
   }
 

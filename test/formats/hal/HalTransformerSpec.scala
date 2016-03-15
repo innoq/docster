@@ -2,7 +2,7 @@ package formats.hal
 
 import java.net.URI
 
-import model.{Relation, JArray, JObject, JString}
+import model._
 import org.scalatest.FlatSpec
 import services._
 
@@ -248,6 +248,36 @@ class HalTransformerSpec extends FlatSpec {
       |}
     """.stripMargin
 
+
+  it should "extract the right key for a relation" in {
+
+    val json =
+      """
+        |{
+        |    "_links": {
+        |        "om:cancellations": {
+        |            "href" : "https:it-woodland-47740.herokuapp.com/"
+        |        }
+        |    }
+        |}
+      """.stripMargin
+
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+
+    assert(representation.relations.head.key == "cancellations")
+  }
+
+
+  it should "add the resolved curie link to every relation" in {
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = orderServiceJson))
+
+    val expectedRelations = List(
+      Relation("cancellation", "http://localhost:7777/cancellations/0", Some(Description(Right(URI.create("http://example.com/rels/ordermanager/cancellation")))))
+    )
+
+    assert(representation.relations.filter(_.key == "cancellation") == expectedRelations)
+  }
+
   it should "transform embedded entities" in {
 
     val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = orderServiceJson))
@@ -323,9 +353,9 @@ class HalTransformerSpec extends FlatSpec {
     val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
 
     val expectedAttributes = JObject(Map(
-    ("object", JObject(Map(
-      ("name", JString("myObject")),
-      ("status", JString("cancelled")))))))
+      ("object", JObject(Map(
+        ("name", JString("myObject")),
+        ("status", JString("cancelled")))))))
 
     assert(representation.attributes.get == expectedAttributes)
   }
@@ -351,13 +381,13 @@ class HalTransformerSpec extends FlatSpec {
     val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
 
     val expectedAttributes = JObject(Map(
-    ("objects", JArray(List(
-     JObject(Map(
-      ("name", JString("myObject1")),
-      ("status", JString("cancelled")))),
-     JObject(Map(
-      ("name", JString("myObject2")),
-      ("status", JString("cancelled")))))
+      ("objects", JArray(List(
+        JObject(Map(
+          ("name", JString("myObject1")),
+          ("status", JString("cancelled")))),
+        JObject(Map(
+          ("name", JString("myObject2")),
+          ("status", JString("cancelled")))))
       ))))
 
     assert(representation.attributes.get == expectedAttributes)
