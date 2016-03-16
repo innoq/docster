@@ -32,6 +32,44 @@
     }
 </section>
 
+<section id="actions" class="panel-group">
+    <h@hierarchie id="actions-title-@representation.id">Actions</h@hierarchie>
+    @for(action <- representation.actions) {
+        <div class="action panel panel-default">
+            <div class="panel-heading">@action.relation.key</div>
+            <div class="panel-body">
+                <form role="form" action="@action.relation.uri" method="post">
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <select type="text" name="method" class="form-control">
+                            @for(method <- action.method) {
+                                <option value="@method">@method</option>
+                            }
+                            </select>
+                            <input type="text" name="contentType" value="@action.contentType" hidden>
+                            <input type="text" value="@action.relation.uri" size="70" disabled class="form-control">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-group">
+                        <label for="comment">Json:</label>
+                        <textarea class="form-control" type=text name="json"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-default">Submit</button>
+                    </div>
+                </form>
+            </div>
+            @if(! representation.actions){
+                <p class="text-left"><em>none</em></p>
+            }
+        </div>
+    }
+</section>
+
+
+
+
 <section id="attributes" class="panel-group">
     <h@hierarchie id="attributes-title-@representation.id">Attributes</h@hierarchie>
     <div class="relation panel panel-default">

@@ -393,4 +393,12 @@ class HalTransformerSpec extends FlatSpec {
     assert(representation.attributes.get == expectedAttributes)
   }
 
+
+  it should "add a form for every non 'self' relation" in {
+
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = orderServiceJson))
+
+    assert(representation.actions.size == 1)
+  }
+
 }

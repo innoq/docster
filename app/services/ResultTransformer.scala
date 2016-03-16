@@ -32,6 +32,7 @@ case object ResultTransformer {
     representation
       .modify(_.embeddedRepresentations).setTo(updatedChilds)
       .modify(_.relations.each.uri).using(toRelativeUri(_, host))
+      .modify(_.actions.each.relation.uri).using(toRelativeUri(_, host))
   }
 
   def toRelativeUri(uriToTransform: String, host: String): String = {

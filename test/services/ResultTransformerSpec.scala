@@ -2,7 +2,7 @@ package services
 
 import java.net.URI
 
-import model.{Relation, Representation}
+import model.{Action, Relation, Representation}
 import org.mockito.Mockito._
 import org.scalatest.FlatSpec
 import org.scalatest.concurrent.ScalaFutures
@@ -84,6 +84,15 @@ class ResultTransformerSpec extends FlatSpec with ScalaFutures {
     val result = transformUris(Representation(ANY, embeddedRepresentations = Map((ANY, List(embeddedRepresentation)))), "myhost")
 
     assert(result.embeddedRepresentations.head._2.head.relations.head.uri == "/orders")
+  }
+
+  it should "transform absolute uris to the target host to relative ones also for action relations" in {
+
+    val representation = Representation("anyName", actions = List(Action(Relation("relation1", "https://myhost/orders"), "contentType", List(), List())))
+
+    val result = transformUris(representation, "myhost")
+
+    assert(result.actions.head.relation.uri == "/orders")
   }
 
   it should "not transform absolute uris to a different host" in {

@@ -100,6 +100,12 @@ object HalTransformer extends ContentTypeTransformer {
     }
   }
 
+  private def extractActions(relations: List[Relation]): List[Action] = {
+    relations.filter(_.key != "self").map { rel =>
+      Action(rel, "applicaton/hal+json", List(), List(Post, Put, Delete))
+    }
+  }
+
   override def transform(request: ProxyRequest, response: ProxyResponse): Representation = {
     val representation = hal.readRepresentation(RepresentationFactory.HAL_JSON, new StringReader(response.body))
     toRepresentation(representation)
@@ -108,13 +114,14 @@ object HalTransformer extends ContentTypeTransformer {
   def toRepresentation(representation: ReadableRepresentation): Representation = {
 
     val name = extractTitle(representation)
-    val links = extractRelations(representation)
+    val rels = extractRelations(representation)
     val atts = extractAttributes(representation)
     val embeddeds = representation.getResourceMap.toMap.map {
       case (key, halRepresentation: util.Collection[ReadableRepresentation]) => (key, halRepresentation.toList.map(toRepresentation))
     }
+    val actions = extractActions(rels)
 
-    Representation(name, relations = links, attributes = atts, embeddedRepresentations = embeddeds)
+    Representation(name, relations = rels, attributes = atts, embeddedRepresentations = embeddeds, actions = actions)
   }
 
   override def from: String = "application/hal+json"
