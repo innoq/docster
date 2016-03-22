@@ -34,8 +34,8 @@ object HalTransformer extends ContentTypeTransformer {
       case x: java.lang.Integer => JString(x + "")
       case x: java.lang.Double => JString(x + "")
       case x: java.lang.Boolean => JString(x + "")
-      case x: util.ArrayList[AnyRef] => JArray(x.toList.map(toAttribute))
-      case x: util.Map[String, AnyRef] => JObject(x.toMap.mapValues(toAttribute))
+      case x: util.ArrayList[AnyRef @unchecked] => JArray(x.toList.map(toAttribute))
+      case x: util.Map[String @unchecked, AnyRef @unchecked] => JObject(x.toMap.mapValues(toAttribute))
       case default => throw new IllegalStateException(s"unexpected type: $default.type")
     }
   }
