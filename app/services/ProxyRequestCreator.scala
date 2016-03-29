@@ -22,7 +22,7 @@ case object ProxyRequestCreator {
     }
 
     calculateServerUri(requestPath, docsterConfiguration).map { uri =>
-      val proxyRequest = ProxyRequest(request.method, uri, request.headers.toMap, toProxyRequestBody(request.body)).putHeader("host", List(uri.getHost))
+      val proxyRequest = ProxyRequest(request.method, uri, HttpMessage(request.headers.toMap, toProxyRequestBody(request.body))).putHeader("host", List(uri.getHost))
       addJsonHypermediaContentTypes(proxyRequest)
     }
   }
@@ -36,7 +36,7 @@ case object ProxyRequestCreator {
 
 
   def addJsonHypermediaContentTypes(request: ProxyRequest): ProxyRequest = {
-    val enrichedAcceptHeader: Seq[String] = enrichAcceptHeader(request.headers.get("Accept"), List(HAL_MIME_TYPE))
+    val enrichedAcceptHeader: Seq[String] = enrichAcceptHeader(request.httpMessage.headers.get("Accept"), List(HAL_MIME_TYPE))
     request.putHeader("Accept", enrichedAcceptHeader)
   }
 

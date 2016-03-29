@@ -107,7 +107,7 @@ object HalTransformer extends ContentTypeTransformer {
   }
 
   override def transform(request: ProxyRequest, response: ProxyResponse): Representation = {
-    val representation = hal.readRepresentation(RepresentationFactory.HAL_JSON, new StringReader(response.body))
+    val representation = hal.readRepresentation(RepresentationFactory.HAL_JSON, new StringReader(response.httpMessage.body.getOrElse("")))
     toRepresentation(representation)
   }
 

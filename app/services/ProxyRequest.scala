@@ -12,21 +12,19 @@ import services.MediaRanges._
  *
  * @param method HTTP method
  * @param uri target uri
- * @param headers yes the headers
- * @param body and the body
  */
-case class ProxyRequest(method: String = "GET", uri: URI, headers: Map[String, Seq[String]] = Map.empty, body: Option[String] = None) {
+case class ProxyRequest(method: String = "GET", uri: URI,  httpMessage: HttpMessage = HttpMessage(Map.empty, None)) {
 
-  lazy val mediaRanges = headers.get("Accept").map(toMediaRanges).getOrElse(List.empty).reverse
+  lazy val mediaRanges = httpMessage.headers.get("Accept").map(toMediaRanges).getOrElse(List.empty).reverse
 
   def simpleHeaderMap: Map[String, String] = {
-    headers.map {
+    httpMessage.headers.map {
       case (k, v) => (k, v.mkString(","))
     }
   }
 
   def putHeader(key: String, value: Seq[String]): ProxyRequest = {
-    copy(headers = headers.updated(key, value))
+    copy(httpMessage = HttpMessage(httpMessage.headers.updated(key, value), httpMessage.body))
   }
 
   def putHeader(header: (String, Seq[String])): ProxyRequest = {

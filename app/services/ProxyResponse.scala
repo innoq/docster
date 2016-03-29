@@ -14,7 +14,8 @@ object ProxyResponse {
   def apply(result: Result): ProxyResponse = {
 
     val body = new String(contentAsBytes(result))
-    new ProxyResponse(result.header.status, result.header.headers.mapValues(_.split(",").toList), body)
+    val httpMessage = HttpMessage(result.header.headers.mapValues(_.split(",").toList), Some( body))
+    new ProxyResponse(result.header.status, httpMessage)
   }
 
   private def contentAsBytes(result: Result): Array[Byte] = {
@@ -22,17 +23,15 @@ object ProxyResponse {
       case Some("chunked") => result.body &> Results.dechunk
       case _ => result.body
     }
-    Await.result(eBytes |>>> Iteratee.consume[Array[Byte]](), Duration(1, TimeUnit.SECONDS))
+      Await.result(eBytes |>>> Iteratee.consume[Array[Byte]](), Duration(1, TimeUnit.SECONDS))
   }
 }
 
-case class ProxyResponse(status: Int = 200, headers: Map[String, Seq[String]] = Map(), body: String = "") {
+case class ProxyResponse(status: Int = 200, httpMessage: HttpMessage = HttpMessage(Map.empty, None)) {
 
   def simpleHeaderMap: Map[String, String] = {
-    headers.map {
+    httpMessage.headers.map {
       case (k, v) => (k, v.mkString(","))
     }
   }
 }
-
-

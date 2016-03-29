@@ -72,7 +72,7 @@ class ProxyResponseSpec extends FlatSpec {
 
     val response = ProxyResponse(simpleResult)
 
-    assert(response.body == json)
+    assert(response.httpMessage.body.get == json)
   }
 
   it can "be created from a chunked result object" in {
@@ -81,7 +81,7 @@ class ProxyResponseSpec extends FlatSpec {
 
     val response = ProxyResponse(result)
 
-    assert(response.body == json)
+    assert(response.httpMessage.body.get == json)
   }
 
 }

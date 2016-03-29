@@ -70,7 +70,7 @@ class HalTransformerSpec extends FlatSpec {
   behavior of "a HalTransformer"
 
   it should "use last path segment of the self ref as name" in {
-    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = springRestJson))
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(httpMessage = HttpMessage(body = Some(springRestJson))))
     assert(representation.name == "Orders")
   }
 
@@ -88,7 +88,7 @@ class HalTransformerSpec extends FlatSpec {
         |}
       """.stripMargin
 
-    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(httpMessage = HttpMessage(body = Some(json))))
     assert(representation.name == "Home")
   }
 
@@ -105,7 +105,7 @@ class HalTransformerSpec extends FlatSpec {
         |}
       """.stripMargin
 
-    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(httpMessage = HttpMessage(body = Some(json))))
     assert(representation.name == "Order #1000")
   }
 
@@ -122,12 +122,12 @@ class HalTransformerSpec extends FlatSpec {
         |}
       """.stripMargin
 
-    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(httpMessage = HttpMessage(body = Some(json))))
     assert(representation.name == "Items")
   }
 
   it should " add all links to a relations section" in {
-    val documentation = HalTransformer.transform(anyRequest, ProxyResponse(body = springRestJson))
+    val documentation = HalTransformer.transform(anyRequest, ProxyResponse(httpMessage = HttpMessage(body = Some(springRestJson))))
     val navigations = List(
       Relation("self", "http://localhost:8080/orders"),
       Relation("profile", "http://localhost:8080/profile/orders"),
@@ -262,26 +262,20 @@ class HalTransformerSpec extends FlatSpec {
         |}
       """.stripMargin
 
-    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(httpMessage = HttpMessage(body = Some(json))))
 
     assert(representation.relations.head.key == "cancellations")
   }
 
 
   it should "add the resolved curie link to every relation" in {
-    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = orderServiceJson))
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(httpMessage = HttpMessage(body = Some(orderServiceJson))))
 
     val expectedRelations = List(
       Relation("cancellation", "http://localhost:7777/cancellations/0", Some(Description(Right(URI.create("http://example.com/rels/ordermanager/cancellation")))))
     )
 
     assert(representation.relations.filter(_.key == "cancellation") == expectedRelations)
-  }
-
-  it should "transform embedded entities" in {
-
-    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = orderServiceJson))
-
   }
 
 
@@ -297,7 +291,7 @@ class HalTransformerSpec extends FlatSpec {
         |}
       """.stripMargin
 
-    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(httpMessage = HttpMessage(body = Some(json))))
 
     val expectedAttributes = JObject(Map(
       ("id", JString("442820205")),
@@ -324,7 +318,7 @@ class HalTransformerSpec extends FlatSpec {
         |}
       """.stripMargin
 
-    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(httpMessage = HttpMessage(body = Some(json))))
 
     val expectedAttributes = JObject(Map(
       ("status", JString("fine")),
@@ -350,7 +344,7 @@ class HalTransformerSpec extends FlatSpec {
         |}
       """.stripMargin
 
-    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(httpMessage = HttpMessage(body = Some(json))))
 
     val expectedAttributes = JObject(Map(
       ("object", JObject(Map(
@@ -378,7 +372,7 @@ class HalTransformerSpec extends FlatSpec {
         |}
       """.stripMargin
 
-    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = json))
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(httpMessage = HttpMessage(body = Some(json))))
 
     val expectedAttributes = JObject(Map(
       ("objects", JArray(List(
@@ -396,7 +390,7 @@ class HalTransformerSpec extends FlatSpec {
 
   it should "add a form for every non 'self' relation" in {
 
-    val representation = HalTransformer.transform(anyRequest, ProxyResponse(body = orderServiceJson))
+    val representation = HalTransformer.transform(anyRequest, ProxyResponse(httpMessage = HttpMessage(body = Some(orderServiceJson))))
 
     assert(representation.actions.size == 1)
   }
